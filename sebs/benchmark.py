@@ -261,7 +261,7 @@ class Benchmark(LoggingBase):
             shutil.copy2(nodejs_package_json, os.path.join(output_dir, "package.json"))
 
     def add_benchmark_data(self, output_dir):
-        cmd = "/bin/bash {benchmark_path}/init.sh {output_dir} false"
+        cmd = "/usr/bin/env bash {benchmark_path}/init.sh {output_dir} false"
         paths = [
             self.benchmark_path,
             os.path.join(self.benchmark_path, self.language_name),
