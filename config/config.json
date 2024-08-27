@@ -1,0 +1,35 @@
+{
+  "experiments": {
+    "deployment": "local",
+    "update_code": false,
+    "update_storage": false,
+    "download_results": false,
+    "runtime": {
+      "language": "python",
+      "version": "3.11"
+    },
+    "perf-cost": {
+      "benchmark": "311.compression",
+      "experiments": ["sequential"],
+      "input-size": "test",
+      "repetitions": 1,
+      "concurrent-invocations": 1,
+      "memory-sizes": []
+    }
+  },
+  "deployment": {
+    "name": "local",
+    "local": {
+      "storage": {
+        "address": "172.17.0.2:9000",
+        "mapped_port": 9011,
+        "access_key": "6CvD90Vgs7sp0daAOwkjVO5ezIxxIYLw8w6VANORQWY",
+        "secret_key": "3dbe8a37547672dc22e6d243560a94a965dec208704ebe90edae1b1efd000f65",
+        "instance_id": "4e4279ad0c90c15251bfb6dec4a4de342e34fe28132a3551b000dbb6b03c4f4a",
+        "output_buckets": [],
+        "input_buckets": [],
+        "type": "minio"
+      }
+    }
+  }
+}

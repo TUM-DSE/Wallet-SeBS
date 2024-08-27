@@ -1,0 +1,26 @@
+{
+  "experiments": {
+    "deployment": "local",
+    "update_code": false,
+    "update_storage": false,
+    "download_results": false,
+    "runtime": {
+      "language": "python",
+      "version": "3.11"
+    },
+    "perf-cost": {
+      "benchmark": "110.dynamic-html",
+      "experiments": ["cold", "sequential"],
+      "input-size": "test",
+      "repetitions": 200,
+      "concurrent-invocations": 1,
+      "memory-sizes": []
+    }
+  },
+  "deployment": {
+    "name": "local",
+    "local": {
+      "storage": {}
+    }
+  }
+}
