@@ -185,9 +185,10 @@ class Config(ABC, LoggingBase):
     @abstractmethod
     def deserialize(config: dict, cache: Cache, handlers: LoggingHandlers) -> Config:
         from sebs.local.config import LocalConfig
+        from sebs.cvm.config import CvmConfig
 
         name = config["name"]
-        implementations = {"local": LocalConfig.deserialize}
+        implementations = {"local": LocalConfig.deserialize, "cvm": CvmConfig.deserialize}
         if has_platform("aws"):
             from sebs.aws.config import AWSConfig
 

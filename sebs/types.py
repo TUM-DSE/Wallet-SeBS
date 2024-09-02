@@ -4,6 +4,7 @@ from enum import Enum
 class Platforms(str, Enum):
     AWS = "aws"
     AZURE = "azure"
+    CVM = "cvm"
     GCP = "gcp"
     LOCAL = "local"
     OPENWHISK = "openwhisk"
