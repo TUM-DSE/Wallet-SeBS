@@ -84,7 +84,9 @@ class LocalConfig(Config):
         return config_obj
 
     def serialize(self) -> dict:
-        return {}
+        return {
+            "name": "local"
+        }
 
     def update_cache(self, cache: Cache):
         pass
