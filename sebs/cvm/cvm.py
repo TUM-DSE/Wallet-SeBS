@@ -33,7 +33,7 @@ class Cvm(System):
         self.logging_handlers = logger_handlers
 
     def initialize(self, config: Dict[str, str] = {}, resource_prefix: Optional[str] = None):
-        self.initialize_resources(select_prefix=resource_prefix)
+        self.initialize_resources(select_prefix="cvm")
 
     @property
     def config(self) -> CvmConfig:

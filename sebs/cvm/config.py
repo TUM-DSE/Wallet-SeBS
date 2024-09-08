@@ -43,7 +43,7 @@ class CvmResources(Resources):
         # Check for new config
         if "storage" in config:
             ret._storage = MinioConfig.deserialize(config["storage"])
-            ret.logging.info("Using user-provided configuration of storage for cvm containers.")
+            ret.logging.info("Using user-provided configuration of storage for CVMs.")
         return ret
 
 
@@ -84,7 +84,7 @@ class CvmConfig(Config):
         return config_obj
 
     def serialize(self) -> dict:
-        return {}
+        return {"name": "cvm"}
 
     def update_cache(self, cache: Cache):
         pass
