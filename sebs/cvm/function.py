@@ -1,7 +1,4 @@
 import concurrent.futures
-import docker
-import json
-from typing import Optional
 
 from sebs.faas.function import ExecutionResult, Function, FunctionConfig, Trigger
 
@@ -21,7 +18,7 @@ class HTTPTrigger(Trigger):
 
     def sync_invoke(self, payload: dict) -> ExecutionResult:
         self.logging.debug(f"Invoke function {self.url}")
-        return self._http_invoke(payload, self.url)
+        return self._http_invoke(payload, self.url)  # todo: misst die Zeit bei cold start nicht richtg
 
     def async_invoke(self, payload: dict) -> concurrent.futures.Future:
         pool = concurrent.futures.ThreadPoolExecutor()
@@ -39,72 +36,43 @@ class HTTPTrigger(Trigger):
 class CvmFunction(Function):
     def __init__(
         self,
-        docker_container,
+        vm,
+        context,
         port: int,
         name: str,
         benchmark: str,
         code_package_hash: str,
         config: FunctionConfig,
-        measurement_pid: Optional[int] = None,
     ):
         super().__init__(benchmark, name, code_package_hash, config)
-        self._instance = docker_container
-        self._instance_id = docker_container.id
-        self._instance.reload()
-        networks = self._instance.attrs["NetworkSettings"]["Networks"]
+        self._instance = vm
+        self._context = context
         self._port = port
-        self._url = "{IPAddress}:{Port}".format(
-            IPAddress=networks["bridge"]["IPAddress"], Port=port
-        )
-        if not self._url:
-            self.logging.error(
-                f"Couldn't read the IP address of container from attributes "
-                f"{json.dumps(self._instance.attrs, indent=2)}"
-            )
-            raise RuntimeError(
-                f"Incorrect detection of IP address for container with id {self._instance_id}"
-            )
+        self._url = "{IPAddress}:{Port}".format(IPAddress="localhost", Port=port)
 
-        self._measurement_pid = measurement_pid
+        trigger = HTTPTrigger("aaaaaaa")  # todo
+        super().add_trigger(trigger)
 
     @property
     def url(self) -> str:
         return self._url
-
-    @property
-    def memory_measurement_pid(self) -> Optional[int]:
-        return self._measurement_pid
 
     @staticmethod
     def typename() -> str:
         return "Cvm.CvmFunction"
 
     def serialize(self) -> dict:
-        return {
-            **super().serialize(),
-            "instance_id": self._instance_id,
-            "url": self._url,
-            "port": self._port,
-        }
+        raise NotImplementedError()
+        return {}
 
     @staticmethod
     def deserialize(cached_config: dict) -> "CvmFunction":
-        try:
-            instance_id = cached_config["instance_id"]
-            instance = docker.from_env().containers.get(instance_id)
-            cfg = FunctionConfig.deserialize(cached_config["config"])
-            return CvmFunction(
-                instance,
-                cached_config["port"],
-                cached_config["name"],
-                cached_config["benchmark"],
-                cached_config["hash"],
-                cfg,
-            )
-        except docker.errors.NotFound:
-            raise RuntimeError(f"Cached container {instance_id} not available anymore!")
+        raise NotImplementedError()
+
+    def add_trigger(self, trigger: Trigger):
+        raise NotImplementedError()
 
     def stop(self):
-        self.logging.info(f"Stopping function container {self._instance_id}")
-        self._instance.stop(timeout=0)
-        self.logging.info(f"Function container {self._instance_id} stopped succesfully")
+        self.logging.info(f"Stopping function {self._instance_id}")
+        self._context.__exit__(None, None, None)
+        self.logging.info(f"Function {self._instance_id} stopped succesfully")

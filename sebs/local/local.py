@@ -251,7 +251,7 @@ class Local(System):
     """
 
     def update_function(self, function: Function, code_package: Benchmark):
-        pass
+        raise NotImplementedError()
 
     """
         For local functions, we don't need to do anything for a cached function.
