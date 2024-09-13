@@ -18,9 +18,8 @@ def alive():
 def process_request():
     begin = datetime.datetime.now()
     from function import function
-    end = datetime.datetime.now()
-    # FIXME: measurements?
     ret = function.handler(request.json)
+    end = datetime.datetime.now()
 
     return {
         'begin': begin.strftime('%s.%f'),

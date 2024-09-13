@@ -1,8 +1,9 @@
 import concurrent.futures
-import docker
+import datetime
 import json
 from typing import Optional
-
+import docker
+import requests
 from sebs.faas.function import ExecutionResult, Function, FunctionConfig, Trigger
 
 
@@ -21,7 +22,15 @@ class HTTPTrigger(Trigger):
 
     def sync_invoke(self, payload: dict) -> ExecutionResult:
         self.logging.debug(f"Invoke function {self.url}")
-        return self._http_invoke(payload, self.url)
+
+        begin = datetime.datetime.now()
+        output = requests.post(self.url, json=payload).json()
+        end = datetime.datetime.now()
+
+        result = ExecutionResult.from_times(begin, end)
+        result.request_id = output["request_id"]
+        result.parse_benchmark_output(output)
+        return result
 
     def async_invoke(self, payload: dict) -> concurrent.futures.Future:
         pool = concurrent.futures.ThreadPoolExecutor()
