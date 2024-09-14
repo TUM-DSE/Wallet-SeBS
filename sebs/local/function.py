@@ -30,6 +30,7 @@ class HTTPTrigger(Trigger):
         result = ExecutionResult.from_times(begin, end)
         result.request_id = output["request_id"]
         result.parse_benchmark_output(output)
+        result.times.http_startup = 0
         return result
 
     def async_invoke(self, payload: dict) -> concurrent.futures.Future:

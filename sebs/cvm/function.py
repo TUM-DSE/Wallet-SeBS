@@ -77,6 +77,7 @@ class HTTPTrigger(Trigger):
         result = ExecutionResult.from_times(begin, end)
         result.request_id = output["request_id"]
         result.parse_benchmark_output(output)
+        result.times.http_startup = 0
         result.stats.cold_start = cold
         return result
 
