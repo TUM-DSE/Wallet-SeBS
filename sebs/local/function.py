@@ -24,7 +24,7 @@ class HTTPTrigger(Trigger):
         self.logging.debug(f"Invoke function {self.url}")
 
         begin = datetime.datetime.now()
-        output = requests.post(self.url, json=payload).json()
+        output = requests.post(f"http://{self.url}", json=payload).json()
         end = datetime.datetime.now()
 
         result = ExecutionResult.from_times(begin, end)
