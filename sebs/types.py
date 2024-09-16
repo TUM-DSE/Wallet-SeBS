@@ -5,6 +5,8 @@ class Platforms(str, Enum):
     AWS = "aws"
     AZURE = "azure"
     CVM = "cvm"
+    KATA_QEMU = "kata-qemu"
+    KATA_FC = "kata-fc"
     GCP = "gcp"
     LOCAL = "local"
     OPENWHISK = "openwhisk"

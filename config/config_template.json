@@ -17,8 +17,14 @@
     }
   },
   "deployment": {
-    "name": "cvm",
+    "name": "kata_qemu",
     "cvm": {
+      "storage": {}
+    },
+    "kata_qemu": {
+      "storage": {}
+    },
+    "kata_fc": {
       "storage": {}
     },
     "local": {

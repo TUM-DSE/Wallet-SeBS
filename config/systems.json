@@ -11,11 +11,48 @@
         "images": [
           "build"
         ],
-        "username": "docker_user",
         "deployment": {
           "files": [
             "storage.py"
         ],
+          "packages": []
+        }
+      }
+    }
+  },
+  "kata_qemu": {
+    "languages": {
+      "python": {
+        "base_images": {
+          "3.11": "python:3.11-slim"
+        },
+        "images": [
+          "run",
+          "build"
+        ],
+        "deployment": {
+          "files": [
+            "storage.py"
+          ],
+          "packages": []
+        }
+      }
+    }
+  },
+  "kata_fc": {
+    "languages": {
+      "python": {
+        "base_images": {
+          "3.11": "python:3.11-slim"
+        },
+        "images": [
+          "run",
+          "build"
+        ],
+        "deployment": {
+          "files": [
+            "storage.py"
+          ],
           "packages": []
         }
       }

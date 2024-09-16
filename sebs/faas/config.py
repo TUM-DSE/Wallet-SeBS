@@ -186,9 +186,11 @@ class Config(ABC, LoggingBase):
     def deserialize(config: dict, cache: Cache, handlers: LoggingHandlers) -> Config:
         from sebs.local.config import LocalConfig
         from sebs.cvm.config import CvmConfig
+        from sebs.kata_qemu.config import KataQemuConfig
+        from sebs.kata_fc.config import KataFcConfig
 
         name = config["name"]
-        implementations = {"local": LocalConfig.deserialize, "cvm": CvmConfig.deserialize}
+        implementations = {"local": LocalConfig.deserialize, "cvm": CvmConfig.deserialize, "kata_qemu": KataQemuConfig.deserialize, "kata_fc": KataFcConfig.deserialize}
         if has_platform("aws"):
             from sebs.aws.config import AWSConfig
 
