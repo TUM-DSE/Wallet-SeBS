@@ -32,9 +32,10 @@ class KataQemu(System):
         self._config = config
         self.logging_handlers = logger_handlers
         self._functions = []
+        self._port = 9004
 
     def initialize(self, config: Dict[str, str] = {}, resource_prefix: Optional[str] = None):
-        self.initialize_resources(select_prefix="kata_qemu")
+        self.initialize_resources(select_prefix="kata-qemu")
 
     @property
     def config(self) -> KataQemuConfig:
@@ -87,10 +88,13 @@ class KataQemu(System):
             code_package.hash,
             code_package.code_location,
             function_cfg,
-            self.config.resources.storage_config
+            self.config.resources.storage_config,
+            self._docker_client,
+            self._port
         )
         func.logging_handlers = self.logging_handlers
         self._functions.append(func)
+        self._port += 1
         return func
 
     def cached_function(self, function: Function):
