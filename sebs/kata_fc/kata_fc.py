@@ -34,7 +34,7 @@ class KataFc(System):
         self._functions = []
 
     def initialize(self, config: Dict[str, str] = {}, resource_prefix: Optional[str] = None):
-        self.initialize_resources(select_prefix="kata_fc")
+        self.initialize_resources(select_prefix="kata-fc")
 
     @property
     def config(self) -> KataFcConfig:
