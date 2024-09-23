@@ -1,9 +1,11 @@
-import concurrent.futures
-import datetime
-import sys
 import time
 
+import concurrent.futures
+import datetime
+import os
 import requests
+import subprocess
+
 from sebs.faas.function import ExecutionResult, Function, FunctionConfig, Trigger
 from sebs.storage.config import MinioConfig
 
@@ -30,48 +32,60 @@ class HTTPTrigger(Trigger):
         if not self.function._running:
             cold = True
 
-            sys.path.append("../../..")
-            sys.path.append("../../../tasks")
-            from tasks.vm import (
-                VMResource,
-                get_vm_resource,
-                get_snp_direct_qemu_cmd,
-            )
-            from tasks.qemu import spawn_qemu
-            from tasks.config import SSH_PORT
-
-            vm: QemuVM
-            resource: VMResource = get_vm_resource("snp", "small")
-            config = {
-                "image": "../../../build/image/guest-fs-sebs.qcow2",
-                "ssh_port": SSH_PORT,
-                "boot_prealloc": True,
-            }
-            qemu_cmd = get_snp_direct_qemu_cmd(resource, config)
-
-            context = spawn_qemu(qemu_cmd, numa_node=resource.numa_node, config=config)
-            self.function._context = context
-            vm = context.__enter__()
-            self.function._running = True
-
-            vm.pin_vcpu(resource.pin_base)
-
             environment = {
-                "CODE_LOCATION": self.function._code_location,
                 "MINIO_ADDRESS": self.function._storage_cfg.address,
                 "MINIO_ACCESS_KEY": self.function._storage_cfg.access_key,
                 "MINIO_SECRET_KEY": self.function._storage_cfg.secret_key,
+                "CONTAINER_UID": str(os.getuid()),
+                "CONTAINER_GID": str(os.getgid()),
+                "CONTAINER_USER": "docker_user",
             }
+            environment_args = []
+            for key, value in environment.items():
+                environment_args.append("-e")
+                environment_args.append(f"{key}='{value}'")
 
-            req = requests.post("http://localhost:9002/alive", environment)
+            self.function._container = subprocess.run(
+                ["nerdctl", "run", "--rm", "-d", "--runtime", "io.containerd.kata-fc.v2", "--snapshotter", "devmapper",
+                 *environment_args,                                     # environment variables
+                 "-p", f"{self.function._port}:9003/tcp",               # port forwarding
+                 "-v", f"{self.function._code_location}:/function:ro",  # volume mounts
+                 "sebs:run.kata_qemu.python.3.11", "/bin/bash /sebs/run_server.sh 9003"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True
+            ).stdout.strip()
+
+            self.function._running = True
+
+            self._url = "{IPAddress}:{Port}".format(
+                IPAddress="localhost",
+                Port=self.function._port)
+
+            # Wait until server starts
+            max_attempts = 1000
+            attempts = 0
+            req = None
+            while attempts < max_attempts:
+                try:
+                    req = requests.get(f"http://{self._url}/alive")
+                    break
+                except requests.exceptions.ConnectionError:
+                    time.sleep(0.001)
+                    attempts += 1
+
+            if attempts == max_attempts:
+                raise RuntimeError("Couldn't start function container")
+
             if req.status_code != 200:
-                self.logging.error(req.text)
+                raise RuntimeError(req.text)
 
             self.logging.info(f"Started function")
         else:
             cold = False
 
-        output = requests.post("http://localhost:9002", json=payload).json()
+        output = requests.post(f"http://{self._url}", json=payload).json()
         end = datetime.datetime.now()
 
         result = ExecutionResult.from_times(begin, end)
@@ -96,17 +110,19 @@ class HTTPTrigger(Trigger):
 
 class KataFcFunction(Function):
     def __init__(
-        self,
-        name: str,
-        benchmark: str,
-        code_package_hash: str,
-        code_location: str,
-        config: FunctionConfig,
-        storage_cfg: MinioConfig,
+            self,
+            name: str,
+            benchmark: str,
+            code_package_hash: str,
+            code_location: str,
+            config: FunctionConfig,
+            storage_cfg: MinioConfig,
+            port: int
     ):
         super().__init__(benchmark, name, code_package_hash, config)
         self._code_location = code_location
         self._storage_cfg = storage_cfg
+        self._port = port
 
         self._running = False
 
@@ -122,6 +138,7 @@ class KataFcFunction(Function):
             **super().serialize(),
             "storage_cfg": self._storage_cfg.serialize(),
             "code_location": self._code_location,
+            "port": self._port
         }
 
     @staticmethod
@@ -133,6 +150,7 @@ class KataFcFunction(Function):
             cached_config["code_location"],
             FunctionConfig.deserialize(cached_config["config"]),
             MinioConfig.deserialize(cached_config["storage_cfg"]),
+            cached_config["port"]
         )
 
     def add_trigger(self, trigger: Trigger):
@@ -141,7 +159,13 @@ class KataFcFunction(Function):
     def stop(self):
         if self._running:
             self.logging.info(f"Stopping function")
-            self._context.__exit__(None, None, None)
+            subprocess.run(
+                ["nerdctl", "stop", self._container],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True
+            )
             self._running = False
             self.logging.info(f"Function stopped succesfully")
         else:
