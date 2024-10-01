@@ -9,7 +9,10 @@
     },
     "perf-cost": {
       "benchmark": "110.dynamic-html",
-      "experiments": ["cold", "sequential"],
+      "experiments": [
+        "cold",
+        "sequential"
+      ],
       "input-size": "test",
       "repetitions": 6,
       "concurrent-invocations": 1,
@@ -17,7 +20,7 @@
     }
   },
   "deployment": {
-    "name": "kata_qemu",
+    "name": "gramine",
     "cvm": {
       "storage": {}
     },
@@ -25,6 +28,9 @@
       "storage": {}
     },
     "kata_fc": {
+      "storage": {}
+    },
+    "gramine": {
       "storage": {}
     },
     "local": {

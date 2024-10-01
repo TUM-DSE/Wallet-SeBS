@@ -7,6 +7,7 @@ class Platforms(str, Enum):
     CVM = "cvm"
     KATA_QEMU = "kata-qemu"
     KATA_FC = "kata-fc"
+    GRAMINE = "gramine"
     GCP = "gcp"
     LOCAL = "local"
     OPENWHISK = "openwhisk"

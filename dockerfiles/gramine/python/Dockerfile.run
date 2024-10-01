@@ -1,0 +1,18 @@
+FROM gramineproject/gramine:1.7-jammy
+
+RUN deps=''\
+  && apt-get update\
+  && apt-get install --no-install-recommends -y python3-pip gosu sudo ${deps}\
+  && apt-get purge -y --auto-remove ${deps}\
+  && pip3 install cffi minio bottle
+
+RUN mkdir -p /sebs
+COPY dockerfiles/gramine/python/*.py /sebs/
+ENV PYTHONPATH=/sebs/.python_packages/lib/site-packages:$PYTHONPATH
+
+COPY dockerfiles/gramine/python/python.manifest /
+
+COPY dockerfiles/local/entrypoint.sh /sebs/entrypoint.sh
+RUN chmod +x /sebs/entrypoint.sh
+
+ENTRYPOINT ["/sebs/entrypoint.sh"]

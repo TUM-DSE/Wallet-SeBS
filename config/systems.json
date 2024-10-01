@@ -14,7 +14,7 @@
         "deployment": {
           "files": [
             "storage.py"
-        ],
+          ],
           "packages": []
         }
       }
@@ -44,6 +44,25 @@
       "python": {
         "base_images": {
           "3.11": "python:3.11-slim"
+        },
+        "images": [
+          "run",
+          "build"
+        ],
+        "deployment": {
+          "files": [
+            "storage.py"
+          ],
+          "packages": []
+        }
+      }
+    }
+  },
+  "gramine": {
+    "languages": {
+      "python": {
+        "base_images": {
+          "3.10": "gramineproject/gramine:1.7-jammy"
         },
         "images": [
           "run",

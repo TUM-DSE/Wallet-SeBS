@@ -9,6 +9,7 @@ from sebs.local import Local
 from sebs.cvm import Cvm
 from sebs.kata_qemu import KataQemu
 from sebs.kata_fc import KataFc
+from sebs.gramine import Gramine
 from sebs.cache import Cache
 from sebs.config import SeBSConfig
 from sebs.benchmark import Benchmark
@@ -89,7 +90,13 @@ class SeBS(LoggingBase):
         deployment_config: Optional[Config] = None,
     ) -> FaaSSystem:
         name = config["name"]
-        implementations: Dict[str, Type[FaaSSystem]] = {"local": Local, "cvm": Cvm, "kata_qemu": KataQemu, "kata_fc": KataFc}
+        implementations: Dict[str, Type[FaaSSystem]] = {
+            "local": Local,
+            "cvm": Cvm,
+            "kata_qemu": KataQemu,
+            "kata_fc": KataFc,
+            "gramine": Gramine,
+        }
 
         if has_platform("aws"):
             from sebs.aws import AWS
