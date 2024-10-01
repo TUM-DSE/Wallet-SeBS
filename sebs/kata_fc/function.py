@@ -46,11 +46,11 @@ class HTTPTrigger(Trigger):
                 environment_args.append(f"{key}='{value}'")
 
             self.function._container = subprocess.run(
-                ["nerdctl", "run", "--rm", "-d", "--runtime", "io.containerd.kata-fc.v2", "--snapshotter", "devmapper",
+                ["nerdctl", "run", "-d", "--runtime", "io.containerd.kata-fc.v2", "--snapshotter", "devmapper",
                  *environment_args,                                     # environment variables
                  "-p", f"{self.function._port}:9003/tcp",               # port forwarding
                  "-v", f"{self.function._code_location}:/function:ro",  # volume mounts
-                 "sebs:run.kata_qemu.python.3.11", "/bin/bash /sebs/run_server.sh 9003"],
+                 "sebs:run.kata_fc.python.3.11", "/bin/bash /sebs/run_server.sh 9003"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -160,7 +160,7 @@ class KataFcFunction(Function):
         if self._running:
             self.logging.info(f"Stopping function")
             subprocess.run(
-                ["nerdctl", "stop", self._container],
+                ["nerdctl", "rm", "-f", self._container],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
