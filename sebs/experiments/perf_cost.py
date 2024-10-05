@@ -186,6 +186,7 @@ class PerfCost(Experiment):
                         except Exception as e:
                             error_count += 1
                             error_executions.append(str(e))
+                            self.logging.error(e)
                     samples_generated += invocations
                     if first_iteration:
                         self.logging.info(

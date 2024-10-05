@@ -9,11 +9,11 @@ RUN deps=''\
   && pip3 install cffi minio bottle
 
 RUN mkdir -p /sebs
-COPY dockerfiles/local/python/*.py /sebs/
-COPY dockerfiles/local/python/run_server.sh /sebs/
+COPY dockerfiles/kata_fc/python/*.py /sebs/
+COPY dockerfiles/kata_fc/python/run_server.sh /sebs/
 ENV PYTHONPATH=/sebs/.python_packages/lib/site-packages:$PYTHONPATH
 
-COPY dockerfiles/local/entrypoint.sh /sebs/entrypoint.sh
+COPY dockerfiles/kata_fc/entrypoint.sh /sebs/entrypoint.sh
 RUN chmod +x /sebs/entrypoint.sh
 
 ENTRYPOINT ["/sebs/entrypoint.sh"]
