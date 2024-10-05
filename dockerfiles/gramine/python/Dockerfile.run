@@ -12,7 +12,7 @@ ENV PYTHONPATH=/sebs/.python_packages/lib/site-packages:$PYTHONPATH
 
 COPY dockerfiles/gramine/python/python.manifest /
 
-COPY dockerfiles/local/entrypoint.sh /sebs/entrypoint.sh
+COPY dockerfiles/gramine/entrypoint.sh /sebs/entrypoint.sh
 RUN chmod +x /sebs/entrypoint.sh
 
 ENTRYPOINT ["/sebs/entrypoint.sh"]

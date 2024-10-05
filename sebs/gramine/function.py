@@ -47,7 +47,7 @@ class HTTPTrigger(Trigger):
                     self.function._code_location: {"bind": "/function", "mode": "ro"}
                 },
                 environment=environment,
-                mem_limit="1g",
+                mem_limit="2g",  # benchmark 504 gets OOM killed with 1g
                 security_opt=["seccomp=unconfined"],
                 ports={"9003/tcp": self.function._port},
                 remove=True,

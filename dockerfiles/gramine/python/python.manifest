@@ -55,8 +55,9 @@ path = "/usr/bin/python3.10"
 uri = "file:/usr/bin/python3.10"
 
 [[fs.mounts]]
-type = "tmpfs"
+type = "tmpfs" # tmpfs isn't be shared between processes (problem for 220.video-processing)
 path = "/tmp"
+# uri = "file:/tmp" # a host mount doesn't set file timestamps and ZIP does not support timestamps before 1980 (problem for 311.compression)
 
 [sgx]
 debug = true
