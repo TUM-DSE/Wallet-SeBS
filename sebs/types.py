@@ -8,6 +8,7 @@ class Platforms(str, Enum):
     KATA_QEMU = "kata-qemu"
     KATA_FC = "kata-fc"
     GRAMINE = "gramine"
+    GRAMINE_NATIVE = "gramine_native"
     GCP = "gcp"
     LOCAL = "local"
     OPENWHISK = "openwhisk"

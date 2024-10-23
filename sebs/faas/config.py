@@ -189,6 +189,7 @@ class Config(ABC, LoggingBase):
         from sebs.kata_qemu.config import KataQemuConfig
         from sebs.kata_fc.config import KataFcConfig
         from sebs.gramine.config import GramineConfig
+        from sebs.gramine_native.config import GramineNativeConfig
 
         name = config["name"]
         implementations = {
@@ -197,6 +198,7 @@ class Config(ABC, LoggingBase):
             "kata_qemu": KataQemuConfig.deserialize,
             "kata_fc": KataFcConfig.deserialize,
             "gramine": GramineConfig.deserialize,
+            "gramine_native": GramineNativeConfig.deserialize,
         }
         if has_platform("aws"):
             from sebs.aws.config import AWSConfig

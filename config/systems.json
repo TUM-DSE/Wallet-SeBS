@@ -77,6 +77,24 @@
       }
     }
   },
+  "gramine_native": {
+    "languages": {
+      "python": {
+        "base_images": {
+          "3.11": "python:3.11-slim"
+        },
+        "images": [
+          "build"
+        ],
+        "deployment": {
+          "files": [
+            "storage.py"
+          ],
+          "packages": []
+        }
+      }
+    }
+  },
   "local": {
     "experiments": {
       "python": [

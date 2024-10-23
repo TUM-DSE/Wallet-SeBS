@@ -10,6 +10,7 @@ from sebs.cvm import Cvm
 from sebs.kata_qemu import KataQemu
 from sebs.kata_fc import KataFc
 from sebs.gramine import Gramine
+from sebs.gramine_native import GramineNative
 from sebs.cache import Cache
 from sebs.config import SeBSConfig
 from sebs.benchmark import Benchmark
@@ -96,6 +97,7 @@ class SeBS(LoggingBase):
             "kata_qemu": KataQemu,
             "kata_fc": KataFc,
             "gramine": Gramine,
+            "gramine_native": GramineNative,
         }
 
         if has_platform("aws"):

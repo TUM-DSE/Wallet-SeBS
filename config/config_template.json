@@ -5,7 +5,7 @@
     "download_results": false,
     "runtime": {
       "language": "python",
-      "version": "3.10"
+      "version": "3.11"
     },
     "perf-cost": {
       "benchmark": "110.dynamic-html",
@@ -20,7 +20,7 @@
     }
   },
   "deployment": {
-    "name": "gramine",
+    "name": "gramine_native",
     "cvm": {
       "storage": {}
     },
@@ -31,6 +31,9 @@
       "storage": {}
     },
     "gramine": {
+      "storage": {}
+    },
+    "gramine_native": {
       "storage": {}
     },
     "local": {
