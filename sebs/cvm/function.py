@@ -65,7 +65,7 @@ class HTTPTrigger(Trigger):
 
             req = requests.post("http://localhost:9002/alive", environment)
             if req.status_code != 200:
-                self.logging.error(req.text)
+                raise RuntimeError(req.text)
 
             self.logging.info(f"Started function")
         else:
