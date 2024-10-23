@@ -31,6 +31,4 @@ def process_request():
     }
 
 
-sys.path.append(os.path.join(CODE_LOCATION))
-sys.path.append(os.path.join(CODE_LOCATION, ".python_packages/lib/site-packages/"))
 run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)

@@ -32,12 +32,11 @@ class GramineNative(System):
         self._config = config
         self.logging_handlers = logger_handlers
         self._functions = []
-        self._port = 9004
 
     def initialize(
         self, config: Dict[str, str] = {}, resource_prefix: Optional[str] = None
     ):
-        self.initialize_resources(select_prefix="gramine_native")
+        self.initialize_resources(select_prefix="gramine-native")
 
     @property
     def config(self) -> GramineNativeConfig:
@@ -98,13 +97,10 @@ class GramineNative(System):
             code_package.hash,
             code_package.code_location,
             function_cfg,
-            self.config.resources.storage_config,
-            self._docker_client,
-            self._port,
+            self.config.resources.storage_config
         )
         func.logging_handlers = self.logging_handlers
         self._functions.append(func)
-        self._port += 1
         return func
 
     def cached_function(self, function: Function):

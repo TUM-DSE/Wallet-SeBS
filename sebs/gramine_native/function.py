@@ -1,10 +1,8 @@
 import time
-
 import concurrent.futures
 import datetime
-import docker
-import os
 import requests
+import subprocess
 
 from sebs.faas.function import ExecutionResult, Function, FunctionConfig, Trigger
 from sebs.storage.config import MinioConfig
@@ -36,41 +34,23 @@ class HTTPTrigger(Trigger):
                 "MINIO_ADDRESS": self.function._storage_cfg.address,
                 "MINIO_ACCESS_KEY": self.function._storage_cfg.access_key,
                 "MINIO_SECRET_KEY": self.function._storage_cfg.secret_key,
-                "CONTAINER_UID": str(os.getuid()),
-                "CONTAINER_GID": str(os.getgid()),
-                "CONTAINER_USER": "docker_user",
             }
-            self.function._container = self.function._docker_client.containers.run(
-                image="sebs:run.gramine_native.python.3.10",
-                command="gramine-direct /python /sebs/server.py 9003",
-                volumes={
-                    self.function._code_location: {"bind": "/function", "mode": "ro"}
-                },
-                environment=environment,
-                mem_limit="2g",  # benchmark 504 gets OOM killed with 1g
-                security_opt=["seccomp=unconfined"],
-                ports={"9003/tcp": self.function._port},
-                remove=True,
-                stdout=True,
-                stderr=True,
-                detach=True,
-            )
+
+            subprocess.run(['gramine-manifest', '-D', f'function_path={self.function._code_location}', 'dockerfiles/gramine_native/python/python.manifest.template', 'dockerfiles/gramine_native/python/python.manifest'], check=True)
+            self.function._context = subprocess.Popen(['gramine-direct', 'dockerfiles/gramine_native/python/python', '/sebs/server.py', '9002'])
             self.function._running = True
 
-            self._url = "{IPAddress}:{Port}".format(
-                IPAddress="localhost", Port=self.function._port
-            )
-
             # Wait until server starts
-            max_attempts = 1000
+            max_attempts = 1100
             attempts = 0
             req = None
             while attempts < max_attempts:
                 try:
-                    req = requests.get(f"http://{self._url}/alive")
+                    req = requests.get("http://localhost:9002/alive")
+                    #req = requests.post("http://localhost:9002/alive", environment)
                     break
                 except requests.exceptions.ConnectionError:
-                    time.sleep(0.001)
+                    time.sleep(0.01)
                     attempts += 1
 
             if attempts == max_attempts:
@@ -83,7 +63,7 @@ class HTTPTrigger(Trigger):
         else:
             cold = False
 
-        output = requests.post(f"http://{self._url}", json=payload).json()
+        output = requests.post("http://localhost:9002", json=payload).json()
         end = datetime.datetime.now()
 
         result = ExecutionResult.from_times(begin, end)
@@ -115,14 +95,10 @@ class GramineNativeFunction(Function):
         code_location: str,
         config: FunctionConfig,
         storage_cfg: MinioConfig,
-        docker_client: docker.client,
-        port: int,
     ):
         super().__init__(benchmark, name, code_package_hash, config)
         self._code_location = code_location
         self._storage_cfg = storage_cfg
-        self._docker_client = docker_client
-        self._port = port
 
         self._running = False
 
@@ -138,7 +114,6 @@ class GramineNativeFunction(Function):
             **super().serialize(),
             "storage_cfg": self._storage_cfg.serialize(),
             "code_location": self._code_location,
-            "port": self._port,
         }
 
     @staticmethod
@@ -150,8 +125,6 @@ class GramineNativeFunction(Function):
             cached_config["code_location"],
             FunctionConfig.deserialize(cached_config["config"]),
             MinioConfig.deserialize(cached_config["storage_cfg"]),
-            docker.from_env(),
-            cached_config["port"],
         )
 
     def add_trigger(self, trigger: Trigger):
@@ -160,7 +133,7 @@ class GramineNativeFunction(Function):
     def stop(self):
         if self._running:
             self.logging.info(f"Stopping function")
-            self._container.remove(force=True)
+            self._context.kill()
             self._running = False
             self.logging.info(f"Function stopped succesfully")
         else:
