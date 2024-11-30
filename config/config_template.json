@@ -20,7 +20,7 @@
     }
   },
   "deployment": {
-    "name": "gramine_native",
+    "name": "wallet",
     "cvm": {
       "storage": {}
     },
@@ -34,6 +34,9 @@
       "storage": {}
     },
     "gramine_native": {
+      "storage": {}
+    },
+    "wallet": {
       "storage": {}
     },
     "local": {

@@ -1,0 +1,46 @@
+[loader]
+log_level = "error"
+insecure__use_cmdline_argv = true
+
+[loader.env]
+LD_LIBRARY_PATH = "/lib"
+OMP_NUM_THREADS = "4"
+
+MINIO_ADDRESS = { passthrough = true }
+MINIO_ACCESS_KEY = { passthrough = true }
+MINIO_SECRET_KEY = { passthrough = true }
+PYTHONPATH = "/python/stdlib.zip:/function:/function/.python_packages/lib/site-packages"
+
+[libos]
+entrypoint = "/python/python"
+
+[sys]
+enable_sigterm_injection = true
+enable_extra_runtime_domain_names_conf = true
+stack.size = "2M"
+
+[fs.root]
+type = "tmpfs"
+
+[[fs.mounts]]
+type = "pseudo"
+path = "/lib"
+uri = "lib"
+
+[[fs.mounts]]
+type = "pseudo"
+path = "/python"
+uri = "python"
+
+[[fs.mounts]]
+path = "/function"
+uri = "file:{{ function_path }}"
+
+[[fs.mounts]]
+path = "/sebs/server.py"
+uri = "file:./dockerfiles/gramine_native/python/server.py"
+
+# [[fs.mounts]]
+# type = "tmpfs" # tmpfs isn't be shared between processes (problem for 220.video-processing)
+# path = "/tmp"
+# # uri = "file:/tmp" # a host mount doesn't set file timestamps and ZIP does not support timestamps before 1980 (problem for 311.compression)

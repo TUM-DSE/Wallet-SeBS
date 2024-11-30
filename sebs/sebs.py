@@ -11,6 +11,7 @@ from sebs.kata_qemu import KataQemu
 from sebs.kata_fc import KataFc
 from sebs.gramine import Gramine
 from sebs.gramine_native import GramineNative
+from sebs.wallet import Wallet
 from sebs.cache import Cache
 from sebs.config import SeBSConfig
 from sebs.benchmark import Benchmark
@@ -98,6 +99,7 @@ class SeBS(LoggingBase):
             "kata_fc": KataFc,
             "gramine": Gramine,
             "gramine_native": GramineNative,
+            "wallet": Wallet,
         }
 
         if has_platform("aws"):

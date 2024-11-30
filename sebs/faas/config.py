@@ -190,6 +190,7 @@ class Config(ABC, LoggingBase):
         from sebs.kata_fc.config import KataFcConfig
         from sebs.gramine.config import GramineConfig
         from sebs.gramine_native.config import GramineNativeConfig
+        from sebs.wallet.config import WalletConfig
 
         name = config["name"]
         implementations = {
@@ -199,6 +200,7 @@ class Config(ABC, LoggingBase):
             "kata_fc": KataFcConfig.deserialize,
             "gramine": GramineConfig.deserialize,
             "gramine_native": GramineNativeConfig.deserialize,
+            "wallet": WalletConfig.deserialize,
         }
         if has_platform("aws"):
             from sebs.aws.config import AWSConfig
