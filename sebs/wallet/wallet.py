@@ -100,6 +100,33 @@ class Wallet(System):
             self.config.resources.storage_config
         )
         func.logging_handlers = self.logging_handlers
+
+        # compile manifest
+        subprocess.run([
+            'gramine-manifest',
+            '-D', f'minio_address={func._storage_cfg.address}',
+            '-D', f'minio_access_key={func._storage_cfg.access_key}',
+            '-D', f'minio_secret_key={func._storage_cfg.secret_key}',
+            f'dockerfiles/wallet/python/python.manifest.template',
+            f'{func._code_location}/python.manifest'
+        ], check=True)
+
+        # manifest
+        manifest_address = None
+        with open(f'{func._code_location}/python.manifest') as f:
+            memory = mmap.mmap(f.fileno(), 0)
+            manifest_address = ctypes.addressof(ctypes.c_char.from_buffer(memory))
+
+        # function code
+        code_address = None
+        with open(f'{func._code_location}/function/function.py') as f:
+            memory = mmap.mmap(f.fileno(), 0)
+            code_address = ctypes.addressof(ctypes.c_char.from_buffer(memory))
+
+        # todo: create zygote and save a reference to it
+
+        func._zygote = None
+
         self._functions.append(func)
         return func
 

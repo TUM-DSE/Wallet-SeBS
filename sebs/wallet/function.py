@@ -31,13 +31,10 @@ class HTTPTrigger(Trigger):
             cold = True
 
             environment = {
-                "MINIO_ADDRESS": self.function._storage_cfg.address,
-                "MINIO_ACCESS_KEY": self.function._storage_cfg.access_key,
-                "MINIO_SECRET_KEY": self.function._storage_cfg.secret_key,
+                "ZYGOTE": self.function._zygote
             }
 
-            subprocess.run(['gramine-manifest', '-D', f'function_path={self.function._code_location}', 'dockerfiles/wallet/python/python.manifest.template', 'dockerfiles/wallet/python/python.manifest'], check=True)
-            self.function._context = subprocess.Popen(['gramine-direct', 'dockerfiles/wallet/python/python', '/sebs/server.py', '9002'])
+            self.function._context = subprocess.Popen(['python', 'dockerfiles/wallet/python/server.py', '9002'], env=environment)
             self.function._running = True
 
             # Wait until server starts
@@ -47,7 +44,6 @@ class HTTPTrigger(Trigger):
             while attempts < max_attempts:
                 try:
                     req = requests.get("http://localhost:9002/alive")
-                    #req = requests.post("http://localhost:9002/alive", environment)
                     break
                 except requests.exceptions.ConnectionError:
                     time.sleep(0.01)

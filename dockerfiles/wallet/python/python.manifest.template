@@ -1,15 +1,15 @@
 [loader]
 log_level = "error"
-insecure__use_cmdline_argv = true
+argv = ["python", "-c", "import ctypes; import json; ###### import function; result = json.dump(function.handler(json.loads(ctypes.string_at(###### ADDRESS))), check_circular=False).encode('utf-8') + b'\x00'; ctypes.memmove(###### ADDRESS, result, len(result))"]
 
 [loader.env]
 LD_LIBRARY_PATH = "/lib"
 OMP_NUM_THREADS = "4"
 
-MINIO_ADDRESS = { passthrough = true }
-MINIO_ACCESS_KEY = { passthrough = true }
-MINIO_SECRET_KEY = { passthrough = true }
-PYTHONPATH = "/python/stdlib.zip:/function:/function/.python_packages/lib/site-packages"
+MINIO_ADDRESS = { value = {{ minio_address }} }
+MINIO_ACCESS_KEY = { value = {{ minio_access_key }} }
+MINIO_SECRET_KEY = { value = {{ minio_secret_key }} }
+PYTHONPATH = "/python/stdlib.zip:/python/dependencies.zip"
 
 [libos]
 entrypoint = "/python/python"
@@ -31,16 +31,3 @@ uri = "lib"
 type = "pseudo"
 path = "/python"
 uri = "python"
-
-[[fs.mounts]]
-path = "/function"
-uri = "file:{{ function_path }}"
-
-[[fs.mounts]]
-path = "/sebs/server.py"
-uri = "file:./dockerfiles/gramine_native/python/server.py"
-
-# [[fs.mounts]]
-# type = "tmpfs" # tmpfs isn't be shared between processes (problem for 220.video-processing)
-# path = "/tmp"
-# # uri = "file:/tmp" # a host mount doesn't set file timestamps and ZIP does not support timestamps before 1980 (problem for 311.compression)

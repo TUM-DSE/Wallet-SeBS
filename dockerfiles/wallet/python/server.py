@@ -2,11 +2,12 @@ import datetime
 import os
 import sys
 import uuid
+import mmap
+import ctypes
+import json
 
-import bottle
 from bottle import route, run, template, request
 
-CODE_LOCATION = "/function"
 
 
 @route("/alive", method="GET")
@@ -16,11 +17,25 @@ def alive():
 
 @route("/", method="POST")
 def process_request():
-    begin = datetime.datetime.now()
-    from function import function
 
-    ret = function.handler(request.json)
+    # function request/parameter
+    memory = mmap.mmap(-1, mmap.ALLOCATIONGRANULARITY, access=mmap.ACCESS_WRITE)
+    request.body.readinto(memory)
+    request_mem_address = ctypes.addressof(ctypes.c_char.from_buffer(memory))
+
+    # todo: check alignment
+    print(request_mem_address)
+    print(request_mem_address % mmap.ALLOCATIONGRANULARITY == 0)
+
+    begin = datetime.datetime.now()
+
+    # todo: create trustlet from a zygote with the argument in request_mem_address getting mapped into the trustlet
+    # os.environ['ZYGOTE']
+
     end = datetime.datetime.now()
+
+    ret = json.loads(ctypes.string_at(buffer_address)) # todo: same address? overhead?
+    memory.close()
 
     return {
         "begin": begin.strftime("%s.%f"),
