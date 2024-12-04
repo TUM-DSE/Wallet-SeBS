@@ -6,9 +6,9 @@ insecure__use_cmdline_argv = true
 LD_LIBRARY_PATH = "/lib"
 OMP_NUM_THREADS = "4"
 
-MINIO_ADDRESS = { passthrough = true }
-MINIO_ACCESS_KEY = { passthrough = true }
-MINIO_SECRET_KEY = { passthrough = true }
+MINIO_ADDRESS = { value = {{ minio_address }} }
+MINIO_ACCESS_KEY = { value = {{ minio_access_key }} }
+MINIO_SECRET_KEY = { value = {{ minio_secret_key }} }
 PYTHONPATH = "/python/stdlib.zip:/function:/function/.python_packages/lib/site-packages"
 
 [libos]

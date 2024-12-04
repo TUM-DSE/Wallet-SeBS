@@ -1,6 +1,7 @@
 import os
 import shutil
 from typing import Dict, List, Tuple, Type, Optional, cast
+import subprocess
 
 import docker
 from sebs.benchmark import Benchmark
@@ -100,6 +101,17 @@ class GramineNative(System):
             self.config.resources.storage_config
         )
         func.logging_handlers = self.logging_handlers
+
+        subprocess.run([
+            'gramine-manifest',
+            '-D', f'minio_address={func._storage_cfg.address}',
+            '-D', f'minio_access_key={func._storage_cfg.access_key}',
+            '-D', f'minio_secret_key={func._storage_cfg.secret_key}',
+            '-D', f'function_path={func._code_location}',
+            f'dockerfiles/gramine_native/python/python.manifest.template',
+            f'{func._code_location}/python.manifest'
+        ], check=True)
+
         self._functions.append(func)
         return func
 

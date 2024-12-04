@@ -30,14 +30,7 @@ class HTTPTrigger(Trigger):
         if not self.function._running:
             cold = True
 
-            environment = {
-                "MINIO_ADDRESS": self.function._storage_cfg.address,
-                "MINIO_ACCESS_KEY": self.function._storage_cfg.access_key,
-                "MINIO_SECRET_KEY": self.function._storage_cfg.secret_key,
-            }
-
-            subprocess.run(['gramine-manifest', '-D', f'function_path={self.function._code_location}', 'dockerfiles/gramine_native/python/python.manifest.template', 'dockerfiles/gramine_native/python/python.manifest'], check=True)
-            self.function._context = subprocess.Popen(['gramine-direct', 'dockerfiles/gramine_native/python/python', '/sebs/server.py', '9002'])
+            self.function._context = subprocess.Popen(['gramine-direct', f'{self.function._code_location}/python', '/sebs/server.py', '9002'])
             self.function._running = True
 
             # Wait until server starts
