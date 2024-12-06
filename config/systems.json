@@ -108,7 +108,7 @@
           "files": [
             "storage.py"
           ],
-          "packages": [ "minio", "bottle" ]
+          "packages": [ ]
         }
       }
     }

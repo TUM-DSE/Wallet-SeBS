@@ -2,6 +2,7 @@ import time
 import concurrent.futures
 import datetime
 import requests
+import os
 import subprocess
 
 from sebs.faas.function import ExecutionResult, Function, FunctionConfig, Trigger
@@ -31,10 +32,18 @@ class HTTPTrigger(Trigger):
             cold = True
 
             environment = {
+                "CODE_LOCATION": self.function._code_location,
+                "MINIO_ADDRESS": self.function._storage_cfg.address,
+                "MINIO_ACCESS_KEY": self.function._storage_cfg.access_key,
+                "MINIO_SECRET_KEY": self.function._storage_cfg.secret_key,
                 "ZYGOTE": self.function._zygote
             }
 
-            self.function._context = subprocess.Popen(['python', 'dockerfiles/wallet/python/server.py', '9002'], env=environment)
+            self.function._context = subprocess.Popen([
+                'python-venv/bin/python',
+                f'{self.function._code_location}/server.py' if os.path.exists(f'{self.function._code_location}/server.py') else 'dockerfiles/wallet/python/server.py',
+                '9002'
+            ], env=environment)
             self.function._running = True
 
             # Wait until server starts
@@ -50,7 +59,7 @@ class HTTPTrigger(Trigger):
                     attempts += 1
 
             if attempts == max_attempts:
-                raise RuntimeError("Couldn't start function container")
+                raise RuntimeError("Couldn't start function")
 
             if req.status_code != 200:
                 raise RuntimeError(req.text)
@@ -110,11 +119,12 @@ class WalletFunction(Function):
             **super().serialize(),
             "storage_cfg": self._storage_cfg.serialize(),
             "code_location": self._code_location,
+            "zygote": self._zygote,
         }
 
     @staticmethod
     def deserialize(cached_config: dict) -> "WalletFunction":
-        return WalletFunction(
+        function = WalletFunction(
             cached_config["name"],
             cached_config["benchmark"],
             cached_config["hash"],
@@ -122,6 +132,8 @@ class WalletFunction(Function):
             FunctionConfig.deserialize(cached_config["config"]),
             MinioConfig.deserialize(cached_config["storage_cfg"]),
         )
+        function._zygote = cached_config["zygote"]
+        return function
 
     def add_trigger(self, trigger: Trigger):
         raise NotImplementedError()
