@@ -3,10 +3,8 @@ import io
 import os
 import shutil
 import uuid
+import base64
 import zlib
-
-from . import storage
-client = storage.storage.get_instance()
 
 def parse_directory(directory):
 
@@ -17,11 +15,7 @@ def parse_directory(directory):
     return size
 
 def handler(event):
-  
-    bucket = event.get('bucket').get('bucket')
-    input_prefix = event.get('bucket').get('input')
-    output_prefix = event.get('bucket').get('output')
-    key = event.get('object').get('key')
+
     download_path = '/tmp/{}-{}'.format(key, uuid.uuid4())
     os.makedirs(download_path)
 
@@ -40,18 +34,15 @@ def handler(event):
     key_name = client.upload(bucket, os.path.join(output_prefix, archive_name), os.path.join(download_path, archive_name))
     s3_upload_stop = datetime.datetime.now()
 
-    download_time = (s3_download_stop - s3_download_begin) / datetime.timedelta(microseconds=1)
-    upload_time = (s3_upload_stop - s3_upload_begin) / datetime.timedelta(microseconds=1)
+    #download_time = (s3_download_stop - s3_download_begin) / datetime.timedelta(microseconds=1)
+    #upload_time = (s3_upload_stop - s3_upload_begin) / datetime.timedelta(microseconds=1)
     process_time = (compress_end - compress_begin) / datetime.timedelta(microseconds=1)
     return {
-            'result': {
-                'bucket': bucket,
-                'key': key_name
-            },
+            'result': base64.b64encode(resized).decode('utf-8'),
             'measurement': {
-                'download_time': download_time,
+                #'download_time': download_time,
                 'download_size': size,
-                'upload_time': upload_time,
+                #'upload_time': upload_time,
                 'upload_size': archive_size,
                 'compute_time': process_time
             }
