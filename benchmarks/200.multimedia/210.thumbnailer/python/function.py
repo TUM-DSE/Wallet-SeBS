@@ -1,10 +1,8 @@
 import datetime
 import io
-import os
 import sys
 import uuid
 import base64
-from urllib.parse import unquote_plus
 from PIL import Image
 
 # Disk-based solution

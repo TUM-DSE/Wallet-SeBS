@@ -6,9 +6,8 @@ import mmap
 import ctypes
 import json
 
-sys.path.append(os.environ['CODE_LOCATION'])
-
 # todo: temp
+sys.path.append(os.environ['CODE_LOCATION'])
 sys.path.append(os.path.join(os.environ['CODE_LOCATION'], '.python_packages/lib/site-packages/'))
 
 from bottle import route, run, template, request
@@ -32,10 +31,6 @@ def process_request():
     #request.body.readinto(memory)
     memory.write(data)
     request_mem_address = ctypes.addressof(ctypes.c_char.from_buffer(memory))
-
-    # todo: check alignment
-    print(request_mem_address)
-    print(request_mem_address % mmap.ALLOCATIONGRANULARITY == 0)
 
     # todo: temporary test
     from function import function
