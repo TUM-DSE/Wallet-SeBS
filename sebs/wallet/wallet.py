@@ -135,7 +135,7 @@ class Wallet(System):
         pass
 
     def update_function(self, function: Function, code_package: Benchmark):
-        raise NotImplementedError()
+        pass
 
     def update_function_configuration(
         self, cached_function: Function, benchmark: Benchmark
