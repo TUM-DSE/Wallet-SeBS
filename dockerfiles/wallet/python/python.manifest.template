@@ -1,14 +1,20 @@
 [loader]
 log_level = "error"
-argv = ["python", "-c", "import ctypes; import json; ###### import function; result = json.dumps(function.handler(json.loads(ctypes.string_at(###### ADDRESS))), check_circular=False).encode('utf-8') + b'\x00'; ctypes.memmove(###### ADDRESS, result, len(result))"]
+argv = ["python", "-c", """\
+import ctypes
+import json
+###### import function
+
+result = json.dumps(function.handler(json.loads(ctypes.string_at(###### ADDRESS))), check_circular=False).encode('utf-8') + b'\\x00'
+ctypes.memmove(###### ADDRESS, result, len(result))
+"""]
 
 [loader.env]
 LD_LIBRARY_PATH = "/lib"
 OMP_NUM_THREADS = "4"
-
-MINIO_ADDRESS = { value = {{ minio_address }} }
-MINIO_ACCESS_KEY = { value = {{ minio_access_key }} }
-MINIO_SECRET_KEY = { value = {{ minio_secret_key }} }
+MINIO_ADDRESS = { value = "{{ minio_address }}" }
+MINIO_ACCESS_KEY = { value = "{{ minio_access_key }}" }
+MINIO_SECRET_KEY = { value = "{{ minio_secret_key }}" }
 PYTHONPATH = "/python/stdlib.zip:/python/dependencies.zip"
 
 [libos]

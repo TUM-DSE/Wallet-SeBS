@@ -51,8 +51,8 @@ def process_request():
     from function import function
     ret = function.handler(data)
 
-    # todo: create trustlet from a zygote with the argument in request_mem_address getting mapped into the trustlet
-    # os.environ['ZYGOTE']
+    # todo: run trustlet with the argument in request_mem_address getting mapped into the trustlet
+    # os.environ['TRUSTLET']
     # ret = json.loads(ctypes.string_at(buffer_address)) # todo: same address? overhead?
 
     upload_begin = datetime.datetime.now()
