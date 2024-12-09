@@ -70,7 +70,11 @@ class HTTPTrigger(Trigger):
         else:
             cold = False
 
-        output = requests.post("http://localhost:9002", json=payload).json()
+        output = requests.post("http://localhost:9002", json=payload)
+        if output.status_code != 200:
+            self.function.stop()
+            raise RuntimeError(f"Couldn't invoke function; output:\n{output.text}")
+        output = output.json()
         end = datetime.datetime.now()
 
         result = ExecutionResult.from_times(begin, end)
