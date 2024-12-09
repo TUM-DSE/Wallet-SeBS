@@ -36,8 +36,10 @@ class HTTPTrigger(Trigger):
                 "MINIO_ADDRESS": self.function._storage_cfg.address,
                 "MINIO_ACCESS_KEY": self.function._storage_cfg.access_key,
                 "MINIO_SECRET_KEY": self.function._storage_cfg.secret_key,
-                "ZYGOTE": self.function._zygote
+                "TRUSTLET": self.function._trustlet
             }
+
+            self.logging.info(f"starting server for trustlet number: {self.function._trustlet}")
 
             self.function._context = subprocess.Popen([
                 'python-venv/bin/python',
@@ -119,7 +121,7 @@ class WalletFunction(Function):
             **super().serialize(),
             "storage_cfg": self._storage_cfg.serialize(),
             "code_location": self._code_location,
-            "zygote": self._zygote,
+            "trustlet": self._trustlet,
         }
 
     @staticmethod
@@ -132,7 +134,7 @@ class WalletFunction(Function):
             FunctionConfig.deserialize(cached_config["config"]),
             MinioConfig.deserialize(cached_config["storage_cfg"]),
         )
-        function._zygote = cached_config["zygote"]
+        function._trustlet = cached_config["trustlet"]
         return function
 
     def add_trigger(self, trigger: Trigger):

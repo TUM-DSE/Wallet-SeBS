@@ -75,7 +75,8 @@ execute(". {}/bin/activate && pip3 install typing-extensions --upgrade".format(e
 
 print("Download benchmarks data")
 try:
-    execute("git submodule update --init --recursive")
+    # execute("git submodule update --init --recursive")
+    pass
 except RuntimeError as error:
     msg = str(error)
     # we're not in a git repository

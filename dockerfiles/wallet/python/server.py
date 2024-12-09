@@ -2,16 +2,11 @@ import datetime
 import os
 import sys
 import uuid
-import mmap
-import ctypes
 import json
-
-# todo: temp
-sys.path.append(os.environ['CODE_LOCATION'])
-sys.path.append(os.path.join(os.environ['CODE_LOCATION'], '.python_packages/lib/site-packages/'))
 
 from bottle import route, run, template, request
 
+import wallet
 
 
 @route("/alive", method="GET")
@@ -24,25 +19,22 @@ def process_request():
 
     begin = datetime.datetime.now()
 
-    data = request.body.read() + b'\x00'
+    data = request.body.read()
 
-    # function request/parameter
-    memory = mmap.mmap(-1, mmap.ALLOCATIONGRANULARITY, access=mmap.ACCESS_WRITE)
-    #request.body.readinto(memory)
-    memory.write(data)
-    request_mem_address = ctypes.addressof(ctypes.c_char.from_buffer(memory))
+    # data = data + b'\x00'
+    # memory = mmap.mmap(-1, len(data), access=mmap.ACCESS_WRITE)
+    # memory.write(data)
+    # request_mem_address = ctypes.addressof(ctypes.c_char.from_buffer(memory))
 
-    # todo: temporary test
-    from function import function
-    ret = function.handler(data)
-
-    # todo: create trustlet from a zygote with the argument in request_mem_address getting mapped into the trustlet
-    # os.environ['ZYGOTE']
-    # ret = json.loads(ctypes.string_at(buffer_address)) # todo: same address? overhead?
+    ret = None
+    with wallet.Wallet() as w:
+        print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])}")
+        ret = w.invoke_trustlet(int(os.environ['TRUSTLET']), data)
+        ret = json.loads(ret)
 
     end = datetime.datetime.now()
 
-    memory.close()
+    # memory.close()
 
     return {
         "begin": begin.strftime("%s.%f"),

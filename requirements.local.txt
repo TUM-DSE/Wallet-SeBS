@@ -1,2 +1,26 @@
 minio==5.0.10
 bottle
+
+
+
+# wallet
+../../module/python
+
+
+
+# see gramine-svsm/Documentation/requirements.txt
+
+# https://tracker.debian.org/pkg/sphinx
+sphinx==5.3.*
+# https://tracker.debian.org/pkg/myst-parser
+myst-parser==0.18.*
+# https://tracker.debian.org/pkg/sphinx-rtd-theme
+sphinx_rtd_theme==1.2.*
+# https://tracker.debian.org/pkg/breathe
+breathe==4.34.*
+# https://tracker.debian.org/pkg/python-tomli
+tomli==2.0.*
+# https://tracker.debian.org/pkg/python-tomli-w
+tomli-w==1.0.*
+# https://tracker.debian.org/pkg/voluptuous
+voluptuous==0.12.*

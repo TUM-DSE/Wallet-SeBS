@@ -15,6 +15,8 @@ from sebs.faas.function import Function, Trigger, ExecutionResult, FunctionConfi
 from sebs.faas.system import System
 from sebs.utils import LoggingHandlers
 
+import wallet
+
 
 class Wallet(System):
     @staticmethod
@@ -102,31 +104,21 @@ class Wallet(System):
         )
         func.logging_handlers = self.logging_handlers
 
-        # # compile manifest
-        # subprocess.run([
-        #     'gramine-manifest',
-        #     '-D', f'minio_address={func._storage_cfg.address}',
-        #     '-D', f'minio_access_key={func._storage_cfg.access_key}',
-        #     '-D', f'minio_secret_key={func._storage_cfg.secret_key}',
-        #     f'dockerfiles/wallet/python/python.manifest.template',
-        #     f'{func._code_location}/python.manifest'
-        # ], check=True)
-        #
-        # # manifest
-        # manifest_address = None
-        # with open(f'{func._code_location}/python.manifest') as f:
-        #     memory = mmap.mmap(f.fileno(), 0)
-        #     manifest_address = ctypes.addressof(ctypes.c_char.from_buffer(memory))
-        #
-        # # function code
-        # code_address = None
-        # with open(f'{func._code_location}/function/function.py') as f:
-        #     memory = mmap.mmap(f.fileno(), 0)
-        #     code_address = ctypes.addressof(ctypes.c_char.from_buffer(memory))
+        # compile manifest
+        subprocess.run([
+            'python-venv/bin/python',
+            '../../gramine-svsm/bin/gramine-manifest',
+            '-D', f'minio_address={func._storage_cfg.address}',
+            '-D', f'minio_access_key={func._storage_cfg.access_key}',
+            '-D', f'minio_secret_key={func._storage_cfg.secret_key}',
+            f'dockerfiles/wallet/python/python.manifest.template',
+            f'{func._code_location}/python.manifest'
+        ], env={"PYTHONPATH": "../../gramine-svsm/python-libs/lib/python3.12/site-packages"}, check=True)
 
-        # todo: create zygote and save a reference to it
-
-        func._zygote = ""
+        with wallet.Wallet() as w:
+            zygote = w.create_zygote("../../module/libpal.so", f"{func._code_location}/python.manifest", "../../module/libsysdb.so")
+            func._trustlet = str(w.create_trustlet(zygote, f'{func._code_location}/function/function.py'))
+            self.logging.info(f"Created zygote {zygote} and trustlet {func._trustlet}")
 
         self._functions.append(func)
         return func
@@ -135,12 +127,12 @@ class Wallet(System):
         pass
 
     def update_function(self, function: Function, code_package: Benchmark):
-        pass
+        self.logging.info("function updated")
 
     def update_function_configuration(
         self, cached_function: Function, benchmark: Benchmark
     ):
-        raise NotImplementedError()
+        self.logging.info("function configuration changed")
 
     def is_configuration_changed(
         self, cached_function: Function, benchmark: Benchmark
