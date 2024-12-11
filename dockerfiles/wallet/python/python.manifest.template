@@ -10,7 +10,7 @@ LD_LIBRARY_PATH = "/lib"
 MINIO_ADDRESS = { value = "{{ minio_address }}" }
 MINIO_ACCESS_KEY = { value = "{{ minio_access_key }}" }
 MINIO_SECRET_KEY = { value = "{{ minio_secret_key }}" }
-PYTHONPATH = "/python/stdlib.zip:/python/dependencies.zip"
+PYTHONPATH = "/python/stdlib.zip:/python/dependencies.zip:/lib"
 
 [fs]
 root.type = "tmpfs"
