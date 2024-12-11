@@ -29,7 +29,9 @@ def process_request():
     ret = None
     with wallet.Wallet() as w:
         print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])}")
-        ret = w.invoke_trustlet(int(os.environ['TRUSTLET']), data)
+        trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
+        ret = trustlet.invoke_trustlet(data, len(data))
+        print(f"trustlet returned: {ret}") # todo: remove
         ret = json.loads(ret)
 
     end = datetime.datetime.now()

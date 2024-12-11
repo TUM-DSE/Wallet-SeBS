@@ -1,39 +1,40 @@
-[loader]
-log_level = "error"
-argv = ["python", "-c", """\
-import ctypes
-import json
-###### import function
+[libos]
+entrypoint = "/python/python"
 
-result = json.dumps(function.handler(json.loads(ctypes.string_at(###### ADDRESS))), check_circular=False).encode('utf-8') + b'\\x00'
-ctypes.memmove(###### ADDRESS, result, len(result))
-"""]
+[loader]
+log_level = "debug"
+argv = ["python3", "-c", "print('import ctypes'); import ctypes; print('string_at'); a=ctypes.string_at(0x140_0000_0000); print(a); exec(a); b=ctypes.string_at(0x280_0000_0000); print(b); out=b'out data'; ptr=ctypes.POINTER(ctypes.c_char*len(out)); dst=ctypes.cast(0x300_0000_0000, ptr); ctypes.memmove(dst, out, len(out)); c=ctypes.string_at(0x300_0000_0000); print(c); print('done!');"]
 
 [loader.env]
 LD_LIBRARY_PATH = "/lib"
-OMP_NUM_THREADS = "4"
 MINIO_ADDRESS = { value = "{{ minio_address }}" }
 MINIO_ACCESS_KEY = { value = "{{ minio_access_key }}" }
 MINIO_SECRET_KEY = { value = "{{ minio_secret_key }}" }
 PYTHONPATH = "/python/stdlib.zip:/python/dependencies.zip"
 
-[libos]
-entrypoint = "/python/python"
+[fs]
+root.type = "tmpfs"
+mounts = [
+  { type = "pseudo", path = "/lib", uri = "lib" },
+  { type = "pseudo", path = "/python", uri = "python" },
+]
 
-[sys]
-enable_sigterm_injection = true
-enable_extra_runtime_domain_names_conf = true
-stack.size = "2M"
+[sgx]
+debug = true
+edmm_enable = false
+trusted_files = [
+]
+max_threads = 4
+isvprodid = 0
+isvsvn = 0
+remote_attestation = "none"
+enable_stats = false
+enclave_size = "256M"
+use_exinfo = false
 
-[fs.root]
-type = "tmpfs"
-
-[[fs.mounts]]
-type = "pseudo"
-path = "/lib"
-uri = "lib"
-
-[[fs.mounts]]
-type = "pseudo"
-path = "/python"
-uri = "python"
+[sgx.cpu_features]
+avx = "unspecified"
+avx512 = "unspecified"
+amx = "unspecified"
+mpx = "disabled"
+pkru = "disabled"
