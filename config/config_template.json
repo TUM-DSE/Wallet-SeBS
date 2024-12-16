@@ -20,8 +20,11 @@
     }
   },
   "deployment": {
-    "name": "gramine_native",
+    "name": "native",
     "cvm": {
+      "storage": {}
+    },
+    "native": {
       "storage": {}
     },
     "kata_qemu": {

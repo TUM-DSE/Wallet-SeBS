@@ -11,6 +11,7 @@ class Platforms(str, Enum):
     GRAMINE_NATIVE = "gramine_native"
     GCP = "gcp"
     LOCAL = "local"
+    NATIVE = "native"
     OPENWHISK = "openwhisk"
 
 

@@ -6,6 +6,7 @@ import docker
 import sebs.storage
 from sebs import types
 from sebs.local import Local
+from sebs.native import Native
 from sebs.cvm import Cvm
 from sebs.kata_qemu import KataQemu
 from sebs.kata_fc import KataFc
@@ -93,6 +94,7 @@ class SeBS(LoggingBase):
         name = config["name"]
         implementations: Dict[str, Type[FaaSSystem]] = {
             "local": Local,
+            "native": Native,
             "cvm": Cvm,
             "kata_qemu": KataQemu,
             "kata_fc": KataFc,
