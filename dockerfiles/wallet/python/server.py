@@ -21,17 +21,13 @@ def process_request():
 
     data = request.body.read()
 
-    # data = data + b'\x00'
-    # memory = mmap.mmap(-1, len(data), access=mmap.ACCESS_WRITE)
-    # memory.write(data)
-    # request_mem_address = ctypes.addressof(ctypes.c_char.from_buffer(memory))
-
     ret = None
     with wallet.Wallet() as w:
-        print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])}")
+        print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data)} output size.")
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
-        ret = trustlet.invoke_trustlet(data, len(data))
-        print(f"trustlet returned: {ret}") # todo: remove
+        output_len = 103000 # 102067 for 503
+        ret = trustlet.invoke_trustlet(data, output_len)
+        print(f"trustlet returned: {ret}") # todo: remove!
         ret = json.loads(ret)
 
     end = datetime.datetime.now()
@@ -43,7 +39,7 @@ def process_request():
         "end": end.strftime("%s.%f"),
         "request_id": str(uuid.uuid4()),
         "is_cold": False,
-        "result": {"output": ret},
+        "result": {"output": None}, # todo: temp
     }
 
 
