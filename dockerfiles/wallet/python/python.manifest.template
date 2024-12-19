@@ -3,14 +3,29 @@ entrypoint = "/python/python"
 
 [loader]
 log_level = "debug"
-argv = ["python3", "-c", "import ctypes; import json; a=ctypes.string_at(0x140_0000_0000); exec(a); b=ctypes.string_at(0x280_0000_0000); input=json.loads(b); out=handler(input); out=json.dumps(out); print(str(len(out)) + '\\n'); out=b'something else?'; ptr=ctypes.POINTER(ctypes.c_char*len(out)); dst=ctypes.cast(0x300_0000_0000, ptr); ctypes.memmove(dst, out, len(out)); print('done!');"]
+argv = ["python3", "-c", """
+import ctypes
+import json
+a=ctypes.string_at(0x140_0000_0000)
+exec(a)
+b=ctypes.string_at(0x280_0000_0000)
+input=json.loads(b)
+out=handler(input)
+out=json.dumps(out)
+print(f'Länge: {len(out)}\\n')
+#out=b'something else?'
+ptr=ctypes.POINTER(ctypes.c_char*len(out))
+dst=ctypes.cast(0x300_0000_0000, ptr)
+ctypes.memmove(dst, out, len(out))
+print('done!')
+"""]
 
 [loader.env]
 LD_LIBRARY_PATH = "/lib"
 MINIO_ADDRESS = { value = "{{ minio_address }}" }
 MINIO_ACCESS_KEY = { value = "{{ minio_access_key }}" }
 MINIO_SECRET_KEY = { value = "{{ minio_secret_key }}" }
-PYTHONPATH = "/python/stdlib.zip:/python/dependencies.zip:/lib"
+PYTHONPATH = "/python/stdlib.zip:/python/dependencies"
 
 [fs]
 root.type = "tmpfs"

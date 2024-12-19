@@ -4,7 +4,6 @@ insecure__use_cmdline_argv = true
 
 [loader.env]
 LD_LIBRARY_PATH = "/lib"
-OMP_NUM_THREADS = "4"
 
 MINIO_ADDRESS = { value = {{ minio_address }} }
 MINIO_ACCESS_KEY = { value = {{ minio_access_key }} }
