@@ -13,7 +13,8 @@ input=json.loads(b)
 out=handler(input)
 out=json.dumps(out)
 print(f'Länge: {len(out)}\\n')
-#out=b'something else?'
+print(out)
+#out=b'something else?' # sonst zu lang für mmemmove
 ptr=ctypes.POINTER(ctypes.c_char*len(out))
 dst=ctypes.cast(0x300_0000_0000, ptr)
 ctypes.memmove(dst, out, len(out))
