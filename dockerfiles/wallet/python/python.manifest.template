@@ -6,19 +6,22 @@ log_level = "debug"
 argv = ["python3", "-c", """
 import ctypes
 import json
-a=ctypes.string_at(0x140_0000_0000)
+from ctypes import CDLL
+lib = CDLL("/python/cpuid.so")
+
+a = ctypes.string_at(0x140_0000_0000)
 exec(a)
-b=ctypes.string_at(0x280_0000_0000)
-input=json.loads(b)
-out=handler(input)
-out=json.dumps(out)
-print(f'Länge: {len(out)}\\n')
-print(out)
-#out=b'something else?' # sonst zu lang für mmemmove
-ptr=ctypes.POINTER(ctypes.c_char*len(out))
-dst=ctypes.cast(0x300_0000_0000, ptr)
-ctypes.memmove(dst, out, len(out))
-print('done!')
+while True:
+  b = ctypes.string_at(0x280_0000_0000)
+  input = json.loads(b)
+  out = handler(input)
+  out = json.dumps(out).encode('utf-8') + b'\\x00'
+  print(f'Länge: {len(out)}\\n')
+  # out = b'something else?' # sonst zu lang für mmemmove
+  ptr = ctypes.POINTER(ctypes.c_char*len(out))
+  dst = ctypes.cast(0x300_0000_0000, ptr)
+  ctypes.memmove(dst, out, len(out))
+  lib.notify_monitor()
 """]
 
 [loader.env]
@@ -27,6 +30,7 @@ MINIO_ADDRESS = { value = "{{ minio_address }}" }
 MINIO_ACCESS_KEY = { value = "{{ minio_access_key }}" }
 MINIO_SECRET_KEY = { value = "{{ minio_secret_key }}" }
 PYTHONPATH = "/python/stdlib.zip:/python/dependencies"
+OMP_NUM_THREADS = "1"
 
 [fs]
 root.type = "tmpfs"
