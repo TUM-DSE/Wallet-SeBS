@@ -16,7 +16,7 @@ def handler(event):
     process_time = (process_end - process_begin) / datetime.timedelta(microseconds=1)
 
     return {
-            'result': json.dumps(result),
+            'result': result,
             'measurement': {
                 #'download_time': download_time,
                 'compute_time': process_time,

@@ -4,6 +4,7 @@ import sys
 import uuid
 import json
 import base64
+import io
 from urllib.parse import unquote_plus
 
 from function import storage
@@ -48,7 +49,7 @@ def process_request():
         ret = json.loads(ret)
 
     upload_begin = datetime.datetime.now()
-    key_name = client.upload_stream(bucket, os.path.join(output_prefix, key), base64.b64decode(ret.get('result')))
+    key_name = client.upload_stream(bucket, os.path.join(output_prefix, key), io.BytesIO(base64.b64decode(ret.get('result'))))
     upload_end = datetime.datetime.now()
 
     ret['result'] = {

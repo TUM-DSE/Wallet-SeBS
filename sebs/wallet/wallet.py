@@ -39,7 +39,7 @@ class Wallet(System):
     def initialize(
         self, config: Dict[str, str] = {}, resource_prefix: Optional[str] = None
     ):
-        self.initialize_resources(select_prefix="gramine-native")
+        self.initialize_resources(select_prefix="wallet")
 
     @property
     def config(self) -> WalletConfig:

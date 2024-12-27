@@ -2,20 +2,16 @@ import datetime
 import os
 import sys
 import uuid
-import mmap
-import ctypes
 import json
 import base64
 import io
-
-# todo: temp
-sys.path.append(os.path.join(os.path.dirname(__file__), '.python_packages/lib/site-packages/'))
 
 from function import storage
 client = storage.storage.get_instance()
 
 from bottle import route, run, template, request
 
+import wallet
 
 
 @route("/alive", method="GET")
@@ -37,30 +33,23 @@ def process_request():
 
     download_begin = datetime.datetime.now()
     f_data = client.download_stream(bucket, os.path.join(input_prefix, key))
-    download_stop = datetime.datetime.now()
+    download_end = datetime.datetime.now()
 
     data['data'] = base64.b64encode(f_data).decode('utf-8')
 
-    # function request/parameter
-    encoded = json.dumps(data).encode('utf-8') + b'\x00'
-    memory = mmap.mmap(-1, len(encoded), access=mmap.ACCESS_WRITE)
-    memory.write(encoded)
-    request_mem_address = ctypes.addressof(ctypes.c_char.from_buffer(memory))
+    data = json.dumps(data)
 
-    # todo: temporary test
-    from function import function
-    ret = function.handler(data)
-
-    # todo: run trustlet with the argument in request_mem_address getting mapped into the trustlet
-    # os.environ['TRUSTLET']
-    # ret = json.loads(ctypes.string_at(buffer_address)) # todo: same address? overhead?
+    ret = None
+    with wallet.Wallet() as w:
+        print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data)} output size.")
+        trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
+        output_len = 103000 # todo: 102067 for benchmark 503
+        ret = trustlet.invoke_trustlet(data, output_len)
+        ret = json.loads(ret)
 
     upload_begin = datetime.datetime.now()
-    buf = io.BytesIO(ret.get('result').encode())
-    buf.seek(0)
-    key_name = client.upload_stream(bucket, os.path.join(output_prefix, key), buf)
-    upload_stop = datetime.datetime.now()
-    buf.close()
+    key_name = client.upload_stream(bucket, os.path.join(output_prefix, key), io.BytesIO(json.dumps(ret.get('result')).encode()))
+    upload_end = datetime.datetime.now()
 
     ret['result'] = {
         'bucket': bucket,
@@ -68,8 +57,6 @@ def process_request():
     }
 
     end = datetime.datetime.now()
-
-    memory.close()
 
     return {
         "begin": begin.strftime("%s.%f"),
