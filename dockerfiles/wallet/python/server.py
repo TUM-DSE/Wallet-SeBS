@@ -25,7 +25,7 @@ def process_request():
     with wallet.Wallet() as w:
         print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data)} output size.")
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
-        output_len = 103000 # 102067 for benchmark 503
+        output_len = 103000 # 102067 -> 103000 for benchmark 503 and all others
         ret = trustlet.invoke_trustlet(data, output_len)
         ret = json.loads(ret)
 
