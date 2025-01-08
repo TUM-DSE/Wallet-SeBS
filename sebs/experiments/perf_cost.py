@@ -149,7 +149,7 @@ class PerfCost(Experiment):
                 if run_type == PerfCost.RunType.SEQUENTIAL:
                     self._trigger.sync_invoke(self._benchmark_input)
 
-                first_iteration = True
+                first_iteration = False # todo: skip first iteration?
                 while samples_gathered < repetitions:
 
                     if run_type == PerfCost.RunType.COLD or run_type == PerfCost.RunType.BURST:

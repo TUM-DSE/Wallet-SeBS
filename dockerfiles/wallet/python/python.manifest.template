@@ -16,8 +16,7 @@ while True:
   input = json.loads(b)
   out = handler(input)
   out = json.dumps(out).encode('utf-8') + b'\\x00'
-  print(f'Länge: {len(out)}\\n')
-  # out = b'something else?' # sonst zu lang für mmemmove
+  # out = f'Länge: {len(out)}\\n'.encode('utf-8') + b'\\x00' # out ist möglicherweise zu lang für mmemmove
   ptr = ctypes.POINTER(ctypes.c_char*len(out))
   dst = ctypes.cast(0x300_0000_0000, ptr)
   ctypes.memmove(dst, out, len(out))
