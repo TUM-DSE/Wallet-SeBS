@@ -8,6 +8,8 @@ import subprocess
 from sebs.faas.function import ExecutionResult, Function, FunctionConfig, Trigger
 from sebs.storage.config import MinioConfig
 
+import wallet
+
 
 class HTTPTrigger(Trigger):
     def __init__(self, function):
@@ -30,6 +32,11 @@ class HTTPTrigger(Trigger):
 
         if not self.function._running:
             cold = True
+
+            with wallet.Wallet() as w:
+                zygote = w.create_zygote("../../module/libpal.so", f"{self.function._code_location}/python.manifest", "../../module/libsysdb.so")
+                self.function._trustlet = str(zygote.create_trustlet(f'{self.function._code_location}/function/function.py').process_id)
+                self.logging.info(f"Created zygote {zygote} and trustlet {self.function._trustlet}")
 
             environment = {
                 "CODE_LOCATION": self.function._code_location,
@@ -125,7 +132,6 @@ class WalletFunction(Function):
             **super().serialize(),
             "storage_cfg": self._storage_cfg.serialize(),
             "code_location": self._code_location,
-            "trustlet": self._trustlet,
         }
 
     @staticmethod
@@ -138,7 +144,6 @@ class WalletFunction(Function):
             FunctionConfig.deserialize(cached_config["config"]),
             MinioConfig.deserialize(cached_config["storage_cfg"]),
         )
-        function._trustlet = cached_config["trustlet"]
         return function
 
     def add_trigger(self, trigger: Trigger):

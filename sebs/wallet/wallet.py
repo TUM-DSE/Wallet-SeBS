@@ -15,8 +15,6 @@ from sebs.faas.function import Function, Trigger, ExecutionResult, FunctionConfi
 from sebs.faas.system import System
 from sebs.utils import LoggingHandlers
 
-import wallet
-
 
 class Wallet(System):
     @staticmethod
@@ -114,11 +112,6 @@ class Wallet(System):
             f'dockerfiles/wallet/python/python.manifest.template',
             f'{func._code_location}/python.manifest'
         ], env={"PYTHONPATH": "../../gramine-svsm/python-libs/lib/python3.12/site-packages"}, check=True)
-
-        with wallet.Wallet() as w:
-            zygote = w.create_zygote("../../module/libpal.so", f"{func._code_location}/python.manifest", "../../module/libsysdb.so")
-            func._trustlet = str(zygote.create_trustlet(f'{func._code_location}/function/function.py').process_id)
-            self.logging.info(f"Created zygote {zygote} and trustlet {func._trustlet}")
 
         self._functions.append(func)
         return func
