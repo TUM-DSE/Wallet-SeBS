@@ -101,9 +101,7 @@
         "base_images": {
           "3.11": "python:3.11-slim"
         },
-        "images": [
-          "build"
-        ],
+        "images": [ ],
         "deployment": {
           "files": [
             "storage.py"
