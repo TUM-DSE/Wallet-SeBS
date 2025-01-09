@@ -10,7 +10,7 @@ def handler(event):
     graph_generating_end = datetime.datetime.now()
 
     process_begin = datetime.datetime.now()
-    result = graph.pagerank()
+    result = graph.pagerank(implementation="arpack")
     process_end = datetime.datetime.now()
 
     graph_generating_time = (graph_generating_end - graph_generating_begin) / datetime.timedelta(microseconds=1)
