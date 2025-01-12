@@ -3,12 +3,11 @@ import os
 import sys
 import uuid
 
-import bottle
-from bottle import route, run, template, request
-
-
 sys.path.append(os.environ['CODE_LOCATION'])
 sys.path.append(os.path.join(os.environ['CODE_LOCATION'], '.python_packages/lib/site-packages/'))
+
+import bottle
+from bottle import route, run, template, request
 
 
 @route("/alive", method="GET")

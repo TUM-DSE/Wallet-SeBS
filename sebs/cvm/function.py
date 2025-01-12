@@ -36,18 +36,21 @@ class HTTPTrigger(Trigger):
                 VMResource,
                 get_vm_resource,
                 get_snp_direct_qemu_cmd,
+                get_amd_vm_direct_qemu_cmd
             )
             from tasks.qemu import spawn_qemu
             from tasks.config import SSH_PORT
 
             vm: QemuVM
             resource: VMResource = get_vm_resource("snp", "small") # 1 cpu, 8 GB memory
+            # resource: VMResource = get_vm_resource("amd", "small") # 1 cpu, 8 GB memory
             config = {
                 "image": "../../../build/image/guest-fs-sebs.qcow2",
                 "ssh_port": SSH_PORT,
-                "boot_prealloc": True,
+                "boot_prealloc": False
             }
             qemu_cmd = get_snp_direct_qemu_cmd(resource, config)
+            # qemu_cmd = get_amd_vm_direct_qemu_cmd(resource, config)
 
             context = spawn_qemu(qemu_cmd, numa_node=resource.numa_node, config=config)
             self.function._context = context

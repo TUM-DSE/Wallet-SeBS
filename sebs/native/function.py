@@ -1,3 +1,4 @@
+import os
 import time
 import concurrent.futures
 import datetime
@@ -30,14 +31,14 @@ class HTTPTrigger(Trigger):
         if not self.function._running:
             cold = True
 
-            environment = {
+            environment = os.environ | {
                 "CODE_LOCATION": self.function._code_location,
                 "MINIO_ADDRESS": self.function._storage_cfg.address,
                 "MINIO_ACCESS_KEY": self.function._storage_cfg.access_key,
                 "MINIO_SECRET_KEY": self.function._storage_cfg.secret_key,
             }
 
-            self.function._context = subprocess.Popen(['python3', 'dockerfiles/native/python/server.py', '9002'], env=environment)
+            self.function._context = subprocess.Popen(['python-venv/bin/python3', 'dockerfiles/native/python/server.py', '9002'], env=environment)
             self.function._running = True
 
             # Wait until server starts
