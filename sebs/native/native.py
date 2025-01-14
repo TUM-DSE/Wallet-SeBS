@@ -36,7 +36,7 @@ class Native(System):
     def initialize(
             self, config: Dict[str, str] = {}, resource_prefix: Optional[str] = None
     ):
-        self.initialize_resources(select_prefix="gramine-native")
+        self.initialize_resources(select_prefix="native")
 
     @property
     def config(self) -> NativeConfig:
@@ -104,6 +104,8 @@ class Native(System):
         return func
 
     def cached_function(self, function: Function):
+        self.logging.info(f"cached: {function}")
+        self._functions.append(function)
         pass
 
     def update_function(self, function: Function, code_package: Benchmark):
@@ -155,5 +157,6 @@ class Native(System):
         raise NotImplementedError()
 
     def shutdown(self) -> None:
+        self.logging.info(f"shutdown: {self._functions}")
         for function in self._functions:
             function.stop()

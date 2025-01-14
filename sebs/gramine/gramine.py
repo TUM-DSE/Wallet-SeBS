@@ -37,7 +37,7 @@ class Gramine(System):
     def initialize(
         self, config: Dict[str, str] = {}, resource_prefix: Optional[str] = None
     ):
-        self.initialize_resources(select_prefix="gramine")
+        self.initialize_resources(select_prefix="gramine-docker")
 
     @property
     def config(self) -> GramineConfig:
