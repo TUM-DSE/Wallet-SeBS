@@ -43,7 +43,7 @@ class HTTPTrigger(Trigger):
                     #req = requests.post("http://localhost:9002/alive", environment)
                     break
                 except requests.exceptions.ConnectionError:
-                    time.sleep(0.01)
+                    time.sleep(0.001)
                     attempts += 1
 
             if attempts == max_attempts:

@@ -51,8 +51,6 @@ class HTTPTrigger(Trigger):
                 security_opt=["seccomp=unconfined"],
                 ports={"9003/tcp": self.function._port},
                 remove=True,
-                stdout=True,
-                stderr=True,
                 detach=True,
             )
             self.function._running = True
