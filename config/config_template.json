@@ -13,7 +13,7 @@
         "sequential"
       ],
       "input-size": "small",
-      "repetitions": 1,
+      "repetitions": 2,
       "concurrent-invocations": 1,
       "memory-sizes": []
     }

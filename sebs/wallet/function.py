@@ -50,7 +50,7 @@ class HTTPTrigger(Trigger):
 
             self.function._context = subprocess.Popen([
                 'python-venv/bin/python',
-                f'{self.function._code_location}/server.py' if os.path.exists(f'{self.function._code_location}/server.py') else 'dockerfiles/wallet/python/server.py',
+                f'{self.function._code_location}/server.py',
                 '9002'
             ], env=environment)
             self.function._running = True
