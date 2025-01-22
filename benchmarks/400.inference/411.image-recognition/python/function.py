@@ -1,50 +1,26 @@
 
 import datetime, json, os, uuid
-
-# Extract zipped torch model - used in Python 3.8 and 3.9
-# The reason is that torch versions supported for these Python
-# versions are too large for Lambda packages.
-if os.path.exists('function/torch.zip'):
-    import zipfile, sys
-    # we cannot write to the read-only filesystem
-    zipfile.ZipFile('function/torch.zip').extractall('/tmp/')
-    sys.path.append(os.path.join(os.path.dirname(__file__), '/tmp/.python_packages/lib/site-packages'))
+import base64
+import io
 
 from PIL import Image
 import torch
 from torchvision import transforms
 from torchvision.models import resnet50
 
-from . import storage
-client = storage.storage.get_instance()
-
 class_idx = json.load(open(os.path.join("python", "imagenet_class_index.json"), 'r'))
 idx2label = [class_idx[str(k)][1] for k in range(len(class_idx))]
 model = None
 
 def handler(event):
-  
-    bucket = event.get('bucket').get('bucket')
-    input_prefix = event.get('bucket').get('input')
-    model_prefix = event.get('bucket').get('model')
-    key = event.get('object').get('input')
-    model_key = event.get('object').get('model')
-    download_path = '/tmp/{}-{}'.format(key, uuid.uuid4())
-
-    image_download_begin = datetime.datetime.now()
-    image_path = download_path
-    client.download(bucket, os.path.join(input_prefix, key), download_path)
-    image_download_end = datetime.datetime.now()
 
     global model
     if not model:
-        model_download_begin = datetime.datetime.now()
-        model_path = os.path.join('/tmp', model_key)
-        client.download(bucket, os.path.join(model_prefix, model_key), model_path)
-        model_download_end = datetime.datetime.now()
         model_process_begin = datetime.datetime.now()
+        model_data = base64.b64decode(event.get('model'))
         model = resnet50(pretrained=False)
-        model.load_state_dict(torch.load(model_path))
+        model.load_state_dict(torch.load(io.BytesIO(model_data)))
+        del model_data
         model.eval()
         model_process_end = datetime.datetime.now()
     else:
@@ -52,9 +28,12 @@ def handler(event):
         model_download_end = model_download_begin
         model_process_begin = datetime.datetime.now()
         model_process_end = model_process_begin
+
+    image_data = base64.b64decode(event.get('image'))
    
     process_begin = datetime.datetime.now()
-    input_image = Image.open(image_path)
+    input_image = Image.open(io.BytesIO(image_data))
+    del image_data
     preprocess = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
@@ -71,17 +50,17 @@ def handler(event):
     ret = idx2label[index]
     process_end = datetime.datetime.now()
 
-    download_time = (image_download_end- image_download_begin) / datetime.timedelta(microseconds=1)
-    model_download_time = (model_download_end - model_download_begin) / datetime.timedelta(microseconds=1)
+    #download_time = (image_download_end- image_download_begin) / datetime.timedelta(microseconds=1)
+    #model_download_time = (model_download_end - model_download_begin) / datetime.timedelta(microseconds=1)
     model_process_time = (model_process_end - model_process_begin) / datetime.timedelta(microseconds=1)
     process_time = (process_end - process_begin) / datetime.timedelta(microseconds=1)
     return {
             'result': {'idx': index.item(), 'class': ret},
             'measurement': {
-                'download_time': download_time + model_download_time,
+                #'download_time': download_time + model_download_time,
                 'compute_time': process_time + model_process_time,
                 'model_time': model_process_time,
-                'model_download_time': model_download_time
+                #'model_download_time': model_download_time
             }
         }
 
