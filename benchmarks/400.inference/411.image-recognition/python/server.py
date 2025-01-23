@@ -37,7 +37,7 @@ def process_request():
     image = client.download_stream(bucket, os.path.join(input_prefix, key))
     image_download_end = datetime.datetime.now()
 
-    data['image'] = base64.b64encode(image).decode('utf-8')
+    data['image'] = base64.b64encode(image).decode('ascii')
     del image
 
     global model
@@ -48,7 +48,7 @@ def process_request():
         model_b = client.download_stream(bucket, os.path.join(model_prefix, model_key))
         model_download_end = datetime.datetime.now()
 
-        data['model'] = base64.b64encode(model_b).decode('utf-8')
+        data['model'] = base64.b64encode(model_b).decode('ascii')
         del model_b
 
     data = json.dumps(data)

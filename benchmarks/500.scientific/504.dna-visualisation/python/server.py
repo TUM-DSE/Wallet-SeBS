@@ -35,7 +35,7 @@ def process_request():
     f_data = client.download_stream(bucket, os.path.join(input_prefix, key))
     download_end = datetime.datetime.now()
 
-    data['data'] = base64.b64encode(f_data).decode('utf-8')
+    data['data'] = base64.b64encode(f_data).decode('ascii')
 
     data = json.dumps(data)
 

@@ -38,7 +38,7 @@ def handler(event):
     #upload_time = (s3_upload_stop - s3_upload_begin) / datetime.timedelta(microseconds=1)
     process_time = (compress_end - compress_begin) / datetime.timedelta(microseconds=1)
     return {
-            'result': base64.b64encode(resized).decode('utf-8'),
+            'result': base64.b64encode(resized).decode('ascii'),
             'measurement': {
                 #'download_time': download_time,
                 'download_size': size,

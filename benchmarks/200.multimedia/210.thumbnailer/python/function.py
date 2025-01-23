@@ -40,7 +40,7 @@ def handler(event):
     #upload_time = (upload_end - upload_begin) / datetime.timedelta(microseconds=1)
     process_time = (process_end - process_begin) / datetime.timedelta(microseconds=1)
     return {
-            'result': base64.b64encode(resized.getbuffer()).decode('utf-8'),
+            'result': base64.b64encode(resized.getbuffer()).decode('ascii'),
             'measurement': {
                 #'download_time': download_time,
                 'download_size': len(img),

@@ -36,7 +36,7 @@ def process_request():
     img = client.download_stream(bucket, os.path.join(input_prefix, key))
     download_end = datetime.datetime.now()
 
-    data['img'] = base64.b64encode(img).decode('utf-8')
+    data['img'] = base64.b64encode(img).decode('ascii')
 
     data = json.dumps(data)
 
