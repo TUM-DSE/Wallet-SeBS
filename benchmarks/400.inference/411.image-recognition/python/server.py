@@ -59,7 +59,7 @@ def process_request():
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
         output_len = 200 # 125 -> 200 for benchmark 411
         ret = trustlet.invoke_trustlet(data, output_len)
-        print(f"len: {ret}", file=sys.stderr, flush=True)
+        # print(f"ret: {ret}")
         ret = json.loads(ret)
 
     end = datetime.datetime.now()

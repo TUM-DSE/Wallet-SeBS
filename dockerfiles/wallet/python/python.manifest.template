@@ -3,6 +3,7 @@ entrypoint = "/python/python"
 
 [loader]
 log_level = "debug"
+insecure__disable_aslr = true
 argv = ["python3", "-c", """
 import ctypes
 import json
@@ -37,23 +38,3 @@ mounts = [
   { type = "pseudo", path = "/lib", uri = "lib" },
   { type = "pseudo", path = "/python", uri = "python" },
 ]
-
-[sgx]
-debug = true
-edmm_enable = false
-trusted_files = [
-]
-max_threads = 4
-isvprodid = 0
-isvsvn = 0
-remote_attestation = "none"
-enable_stats = false
-enclave_size = "256M"
-use_exinfo = false
-
-[sgx.cpu_features]
-avx = "unspecified"
-avx512 = "unspecified"
-amx = "unspecified"
-mpx = "disabled"
-pkru = "disabled"
