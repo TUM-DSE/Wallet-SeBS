@@ -2,7 +2,7 @@
 entrypoint = "/python/python"
 
 [loader]
-log_level = "debug"
+log_level = "warning"
 insecure__disable_aslr = true
 argv = ["python3", "-c", """
 import ctypes
@@ -10,18 +10,21 @@ import json
 from ctypes import CDLL
 lib = CDLL("/python/cpuid.so")
 
+lib.notify_monitor()                                             # begin time
 a = ctypes.string_at(0x140_0000_0000)
 exec(a)
 while True:
   b = ctypes.string_at(0x280_0000_0000)
   input = json.loads(b)
   out = handler(input)
+  lib.notify_monitor()                                           # end time
   out = json.dumps(out).encode('utf-8') + b'\\x00'
   # out = f'Länge: {len(out)}\\n'.encode('utf-8') + b'\\x00' # out ist möglicherweise zu lang für mmemmove
   ptr = ctypes.POINTER(ctypes.c_char*len(out))
   dst = ctypes.cast(0x300_0000_0000, ptr)
   ctypes.memmove(dst, out, len(out))
   lib.notify_monitor()
+  lib.notify_monitor()                                           # begin time
 """]
 
 [loader.env]

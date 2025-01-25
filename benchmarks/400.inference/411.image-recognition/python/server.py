@@ -23,8 +23,6 @@ def alive():
 @route("/", method="POST")
 def process_request():
 
-    begin = datetime.datetime.now()
-
     data = request.json
 
     bucket = data.get('bucket').get('bucket')
@@ -41,6 +39,7 @@ def process_request():
     del image
 
     global model
+    print(f"not model: {not model}", flush=True)
     if not model:
         model = True
 
@@ -50,23 +49,32 @@ def process_request():
 
         data['model'] = base64.b64encode(model_b).decode('ascii')
         del model_b
+    else:
+        model_download_begin = datetime.datetime.now()
+        model_download_end = model_download_begin
 
-    data = json.dumps(data)
+    data_json = json.dumps(data)
+    del data
 
+    begin = None
+    end = None
     ret = None
     with wallet.Wallet() as w:
-        print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data)} output size.", file=sys.stderr)
+        print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data_json)} output size.", file=sys.stderr)
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
         output_len = 200 # 125 -> 200 for benchmark 411
-        ret = trustlet.invoke_trustlet(data, output_len)
+        trustlet.invoke_trustlet("", 0)
+        begin = datetime.datetime.now()
+        trustlet.invoke_trustlet(data_json, 0)
+        end = datetime.datetime.now()
+        ret = trustlet.invoke_trustlet("", output_len)
+        #ret = trustlet.invoke_trustlet(data_json, output_len)
         # print(f"ret: {ret}")
         ret = json.loads(ret)
 
-    end = datetime.datetime.now()
-
     return {
         "begin": begin.strftime("%s.%f"),
-        "end": end.strftime("%s.%f"),
+        "end": (end + (image_download_end - image_download_begin) + (model_download_end - model_download_begin)).strftime("%s.%f"),
         "request_id": str(uuid.uuid4()),
         "is_cold": False,
         "result": {"output": ret},

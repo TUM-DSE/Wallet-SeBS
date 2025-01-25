@@ -22,8 +22,6 @@ def alive():
 @route("/", method="POST")
 def process_request():
 
-    begin = datetime.datetime.now()
-
     data = request.json
 
     bucket = data.get('bucket').get('bucket')
@@ -39,12 +37,18 @@ def process_request():
 
     data = json.dumps(data)
 
+    begin = None
+    end = None
     ret = None
     with wallet.Wallet() as w:
         print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data)} output size.")
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
         output_len = 115343000 # 115342243 -> 115343000 for benchmark 504
-        ret = trustlet.invoke_trustlet(data, output_len)
+        trustlet.invoke_trustlet("", 0)
+        begin = datetime.datetime.now()
+        trustlet.invoke_trustlet(data, 0)
+        end = datetime.datetime.now()
+        ret = trustlet.invoke_trustlet("", output_len)
         ret = json.loads(ret)
 
     upload_begin = datetime.datetime.now()
@@ -56,11 +60,9 @@ def process_request():
         'key': key_name
     }
 
-    end = datetime.datetime.now()
-
     return {
         "begin": begin.strftime("%s.%f"),
-        "end": end.strftime("%s.%f"),
+        "end": (end + (download_end - download_begin) + (upload_end - upload_begin)).strftime("%s.%f"),
         "request_id": str(uuid.uuid4()),
         "is_cold": False,
         "result": {"output": ret},

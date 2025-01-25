@@ -17,20 +17,22 @@ def alive():
 @route("/", method="POST")
 def process_request():
 
-    begin = datetime.datetime.now()
-
     data = request.body.read()
 
+    begin = None
+    end = None
     ret = None
     with wallet.Wallet() as w:
         print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data)} output size.")
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
         output_len = 36000 # 35571 -> 36000 for benchmark 110
-        ret = trustlet.invoke_trustlet(data, output_len)
+        trustlet.invoke_trustlet("", 0)
+        begin = datetime.datetime.now()
+        trustlet.invoke_trustlet(data, 0)
+        end = datetime.datetime.now()
+        ret = trustlet.invoke_trustlet("", output_len)
         # print(f"ret: {ret}")
         ret = json.loads(ret)
-
-    end = datetime.datetime.now()
 
     return {
         "begin": begin.strftime("%s.%f"),
