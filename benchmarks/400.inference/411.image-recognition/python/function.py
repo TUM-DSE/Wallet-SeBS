@@ -8,7 +8,7 @@ import torch
 from torchvision import transforms
 from torchvision.models import resnet50
 
-class_idx = json.load(open(os.path.join("python", "imagenet_class_index.json"), 'r'))
+class_idx = json.load(open(os.path.join("dependencies", "imagenet_class_index.json"), 'r'))
 idx2label = [class_idx[str(k)][1] for k in range(len(class_idx))]
 model = None
 

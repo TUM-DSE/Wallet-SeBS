@@ -8,7 +8,7 @@ argv = ["python3", "-c", """
 import ctypes
 import json
 from ctypes import CDLL
-lib = CDLL("/python/cpuid.so")
+lib = CDLL("/lib/libcpuid.so")
 
 lib.notify_monitor()                                             # begin time
 a = ctypes.string_at(0x140_0000_0000)
@@ -32,7 +32,7 @@ LD_LIBRARY_PATH = "/lib"
 MINIO_ADDRESS = { value = "{{ minio_address }}" }
 MINIO_ACCESS_KEY = { value = "{{ minio_access_key }}" }
 MINIO_SECRET_KEY = { value = "{{ minio_secret_key }}" }
-PYTHONPATH = "/python/stdlib.zip:/python/dependencies"
+PYTHONPATH = "/python/stdlib.zip:/dependencies"
 OMP_NUM_THREADS = "1"
 
 [fs]
@@ -40,4 +40,5 @@ root.type = "tmpfs"
 mounts = [
   { type = "pseudo", path = "/lib", uri = "lib" },
   { type = "pseudo", path = "/python", uri = "python" },
+  { type = "pseudo", path = "/dependencies", uri = "dependencies" },
 ]
