@@ -24,7 +24,7 @@ def upload_files(data_root, data_dir, upload_func):
 def generate_input(data_dir, size, benchmarks_bucket, input_paths, output_paths, upload_func):
 
     # upload model
-    model_name = 'resnet50-19c8e357.pth'
+    model_name = 'resnet50-0676ba61.pth'
     upload_func(0, model_name, os.path.join(data_dir, 'model', model_name))
 
     input_images = []
