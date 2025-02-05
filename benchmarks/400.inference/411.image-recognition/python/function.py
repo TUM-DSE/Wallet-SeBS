@@ -1,5 +1,4 @@
 import datetime, json, os
-import base64
 import io
 
 from PIL import Image
@@ -16,7 +15,7 @@ def handler(event):
     global model
     if not model:
         model_process_begin = datetime.datetime.now()
-        model_data = base64.b64decode(event.get('model'))
+        model_data = event.get('model')
         model = resnet50(pretrained=False)
         model.load_state_dict(torch.load(io.BytesIO(model_data)))
         del model_data
@@ -28,7 +27,7 @@ def handler(event):
         model_process_begin = datetime.datetime.now()
         model_process_end = model_process_begin
 
-    image_data = base64.b64decode(event.get('image'))
+    image_data = event.get('image')
    
     process_begin = datetime.datetime.now()
     input_image = Image.open(io.BytesIO(image_data))

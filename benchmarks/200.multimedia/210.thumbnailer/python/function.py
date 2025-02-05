@@ -1,6 +1,5 @@
 import datetime
 import io
-import base64
 from PIL import Image
 
 # Disk-based solution
@@ -23,7 +22,7 @@ def handler(event):
   
     width = event.get('object').get('width')
     height = event.get('object').get('height')
-    img = base64.b64decode(event.get('img'))
+    img = event.get('img')
     # UUID to handle multiple calls
     #download_path = '/tmp/{}-{}'.format(uuid.uuid4(), key)
     #upload_path = '/tmp/resized-{}'.format(key)
@@ -40,7 +39,7 @@ def handler(event):
     #upload_time = (upload_end - upload_begin) / datetime.timedelta(microseconds=1)
     process_time = (process_end - process_begin) / datetime.timedelta(microseconds=1)
     return {
-            'result': base64.b64encode(resized.getbuffer()).decode('ascii'),
+            'result': resized,
             'measurement': {
                 #'download_time': download_time,
                 'download_size': len(img),

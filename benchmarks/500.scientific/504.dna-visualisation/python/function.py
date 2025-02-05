@@ -1,11 +1,12 @@
 import datetime
-import base64
+import json
+
 # using https://squiggle.readthedocs.io/en/latest/
 from squiggle import transform
 
 def handler(event):
 
-    data = base64.b64decode(event.get('data'))
+    data = event.get('data')
 
     process_begin = datetime.datetime.now()
     result = transform(data)
@@ -16,7 +17,7 @@ def handler(event):
     process_time = (process_end - process_begin) / datetime.timedelta(microseconds=1)
 
     return {
-            'result': result,
+            'result': json.dumps(result),
             'measurement': {
                 #'download_time': download_time,
                 'compute_time': process_time,

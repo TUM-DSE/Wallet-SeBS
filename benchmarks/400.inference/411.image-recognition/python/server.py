@@ -2,8 +2,7 @@ import datetime
 import os
 import sys
 import uuid
-import json
-import base64
+import pickle
 
 from function import storage
 client = storage.storage.get_instance()
@@ -35,7 +34,7 @@ def process_request():
     image = client.download_stream(bucket, os.path.join(input_prefix, key))
     image_download_end = datetime.datetime.now()
 
-    data['image'] = base64.b64encode(image).decode('ascii')
+    data['image'] = image
     del image
 
     global model
@@ -47,30 +46,31 @@ def process_request():
         model_b = client.download_stream(bucket, os.path.join(model_prefix, model_key))
         model_download_end = datetime.datetime.now()
 
-        data['model'] = base64.b64encode(model_b).decode('ascii')
+        data['model'] = model_b
         del model_b
     else:
         model_download_begin = datetime.datetime.now()
         model_download_end = model_download_begin
 
-    data_json = json.dumps(data)
+    data_pickle = pickle.dumps(data)
     del data
 
     begin = None
     end = None
     ret = None
     with wallet.Wallet() as w:
-        print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data_json)} output size.", file=sys.stderr)
+        print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data_pickle)} output size.")
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
-        output_len = 200 # 125 -> 200 for benchmark 411
+        output_len = 200 # 123 -> 200 for benchmark 411
         trustlet.invoke_trustlet("", 0)
         begin = datetime.datetime.now()
-        trustlet.invoke_trustlet(data_json, 0)
+        trustlet.invoke_trustlet(data_pickle, 0)
         end = datetime.datetime.now()
         ret = trustlet.invoke_trustlet("", output_len)
-        #ret = trustlet.invoke_trustlet(data_json, output_len)
-        # print(f"ret: {ret}")
-        ret = json.loads(ret)
+
+        #ret = trustlet.invoke_trustlet_bin(data_pickle, output_len)
+
+        ret = pickle.loads(ret)
 
     return {
         "begin": begin.strftime("%s.%f"),

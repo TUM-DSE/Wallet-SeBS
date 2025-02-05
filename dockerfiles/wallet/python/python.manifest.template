@@ -6,19 +6,20 @@ log_level = "warning"
 insecure__disable_aslr = true
 argv = ["python3", "-c", """
 import ctypes
-import json
+import pickle
 from ctypes import CDLL
 lib = CDLL("/lib/libcpuid.so")
 
 lib.notify_monitor()                                             # begin time
 a = ctypes.string_at(0x140_0000_0000)
+# a = (ctypes.c_char * 1048576).from_address(0x140_0000_0000) # 1 MiB # doesnt work
 exec(a)
 while True:
-  b = ctypes.string_at(0x280_0000_0000)
-  input = json.loads(b)
+  b = (ctypes.c_char * 104857600).from_address(0x280_0000_0000) # 100 MiB
+  input = pickle.loads(b)
   out = handler(input)
   lib.notify_monitor()                                           # end time
-  out = json.dumps(out).encode('utf-8') + b'\\x00'
+  out = pickle.dumps(out)
   # out = f'Länge: {len(out)}\\n'.encode('utf-8') + b'\\x00' # out ist möglicherweise zu lang für mmemmove
   ptr = ctypes.POINTER(ctypes.c_char*len(out))
   dst = ctypes.cast(0x300_0000_0000, ptr)

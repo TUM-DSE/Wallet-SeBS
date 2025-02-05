@@ -2,10 +2,9 @@ import datetime
 import os
 import sys
 import uuid
-import json
-import base64
 import io
 from urllib.parse import unquote_plus
+import pickle
 
 from function import storage
 client = storage.storage.get_instance()
@@ -34,9 +33,9 @@ def process_request():
     img = client.download_stream(bucket, os.path.join(input_prefix, key))
     download_end = datetime.datetime.now()
 
-    data['img'] = base64.b64encode(img).decode('ascii')
+    data['img'] = img
 
-    data = json.dumps(data)
+    data = pickle.dumps(data)
 
     begin = None
     end = None
@@ -44,16 +43,16 @@ def process_request():
     with wallet.Wallet() as w:
         print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data)} output size.")
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
-        output_len = 14000 # 13901 -> 14000 for benchmark 210
-        trustlet.invoke_trustlet("", 0)
+        output_len = 11000 # 10480 -> 11000 for benchmark 210
+        trustlet.invoke_trustlet_bin("", 0)
         begin = datetime.datetime.now()
-        trustlet.invoke_trustlet(data, 0)
+        trustlet.invoke_trustlet_bin(data, 0)
         end = datetime.datetime.now()
-        ret = trustlet.invoke_trustlet("", output_len)
-        ret = json.loads(ret)
+        ret = trustlet.invoke_trustlet_bin("", output_len)
+        ret = pickle.loads(ret)
 
     upload_begin = datetime.datetime.now()
-    key_name = client.upload_stream(bucket, os.path.join(output_prefix, key), io.BytesIO(base64.b64decode(ret.get('result'))))
+    key_name = client.upload_stream(bucket, os.path.join(output_prefix, key), ret.get('result'))
     upload_end = datetime.datetime.now()
 
     ret['result'] = {
