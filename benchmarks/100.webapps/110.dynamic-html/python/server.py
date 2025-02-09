@@ -2,7 +2,7 @@ import datetime
 import os
 import sys
 import uuid
-import json
+import pickle
 
 from bottle import route, run, template, request
 
@@ -17,7 +17,8 @@ def alive():
 @route("/", method="POST")
 def process_request():
 
-    data = request.body.read()
+    data = request.json
+    data = pickle.dumps(data)
 
     begin = None
     end = None
@@ -26,13 +27,13 @@ def process_request():
         print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data)} output size.")
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
         output_len = 36000 # 35571 -> 36000 for benchmark 110
-        trustlet.invoke_trustlet("", 0)
+        trustlet.invoke_trustlet_bin("", 0)
         begin = datetime.datetime.now()
-        trustlet.invoke_trustlet(data, 0)
+        trustlet.invoke_trustlet_bin(data, 0)
         end = datetime.datetime.now()
-        ret = trustlet.invoke_trustlet("", output_len)
+        ret = trustlet.invoke_trustlet_bin("", output_len)
         # print(f"ret: {ret}")
-        ret = json.loads(ret)
+        ret = pickle.loads(ret)
 
     return {
         "begin": begin.strftime("%s.%f"),
