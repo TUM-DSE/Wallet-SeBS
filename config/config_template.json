@@ -10,16 +10,17 @@
     "perf-cost": {
       "benchmark": "110.dynamic-html",
       "experiments": [
-        "sequential"
+	"cold",
+	"sequential"
       ],
       "input-size": "small",
-      "repetitions": 2,
+      "repetitions": 5,
       "concurrent-invocations": 1,
       "memory-sizes": []
     }
   },
   "deployment": {
-    "name": "wallet",
+    "name": "wallet_warm",
     "cvm": {
       "storage": {}
     },
@@ -36,6 +37,9 @@
       "storage": {}
     },
     "wallet": {
+      "storage": {}
+    },
+    "wallet_warm": {
       "storage": {}
     },
     "local": {

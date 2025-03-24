@@ -111,6 +111,22 @@
       }
     }
   },
+  "wallet_warm": {
+    "languages": {
+      "python": {
+        "base_images": {
+          "3.11": "python:3.11-slim"
+        },
+        "images": [ ],
+        "deployment": {
+          "files": [
+            "storage.py"
+          ],
+          "packages": [ ]
+        }
+      }
+    }
+  },
   "local": {
     "experiments": {
       "python": [

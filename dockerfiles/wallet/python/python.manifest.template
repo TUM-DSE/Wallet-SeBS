@@ -2,14 +2,14 @@
 entrypoint = "/python/python"
 
 [loader]
-log_level = "warning"
+log_level = "error"
 insecure__disable_aslr = true
 argv = ["python3", "-c", """
 import ctypes
 import pickle
 from ctypes import CDLL
 lib = CDLL("/lib/libcpuid.so")
-
+lib.finalize_zygote()
 lib.notify_monitor()                                             # begin time
 a = ctypes.string_at(0x140_0000_0000)
 # a = (ctypes.c_char * 1048576).from_address(0x140_0000_0000) # 1 MiB # doesnt work
