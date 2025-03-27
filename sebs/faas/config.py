@@ -192,6 +192,7 @@ class Config(ABC, LoggingBase):
         from sebs.gramine_native.config import GramineNativeConfig
         from sebs.wallet.config import WalletConfig
         from sebs.wallet_warm.config import WalletWarmConfig
+        from sebs.wallet_profiling.config import WalletProfilingConfig
         name = config["name"]
         implementations = {
             "local": LocalConfig.deserialize,
@@ -201,7 +202,8 @@ class Config(ABC, LoggingBase):
             "gramine": GramineConfig.deserialize,
             "gramine_native": GramineNativeConfig.deserialize,
             "wallet": WalletConfig.deserialize,
-            "wallet_warm": WalletWarmConfig.deserialize
+            "wallet_warm": WalletWarmConfig.deserialize,
+            "wallet_profiling": WalletProfilingConfig.deserialize
         }
         if has_platform("aws"):
             from sebs.aws.config import AWSConfig

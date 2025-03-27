@@ -7,24 +7,24 @@ import docker
 from sebs.benchmark import Benchmark
 from sebs.cache import Cache
 from sebs.config import SeBSConfig
-from sebs.wallet_warm.config import WalletWarmConfig
-from sebs.wallet_warm.function import WalletWarmFunction
-from sebs.wallet_warm.storage import Minio
+from sebs.wallet_profiling.config import WalletProfilingConfig
+from sebs.wallet_profiling.function import WalletProfilingFunction
+from sebs.wallet_profiling.storage import Minio
 from sebs.faas import PersistentStorage
 from sebs.faas.function import Function, Trigger, ExecutionResult, FunctionConfig
 from sebs.faas.system import System
 from sebs.utils import LoggingHandlers
 
 
-class WalletWarm(System):
+class WalletProfiling(System):
     @staticmethod
     def name() -> str:
-        return "wallet_warm"
+        return "wallet_profiling"
 
     def __init__(
         self,
         system_config: SeBSConfig,
-        config: WalletWarmConfig,
+        config: WalletProfilingConfig,
         cache_client: Cache,
         docker_client: docker.client,
         logger_handlers: LoggingHandlers,
@@ -37,21 +37,21 @@ class WalletWarm(System):
     def initialize(
         self, config: Dict[str, str] = {}, resource_prefix: Optional[str] = None
     ):
-        self.initialize_resources(select_prefix="wallet_warm")
+        self.initialize_resources(select_prefix="walletprofiling")
 
     @property
-    def config(self) -> WalletWarmConfig:
+    def config(self) -> WalletProfilingConfig:
         return self._config
 
     @staticmethod
     def function_type() -> "Type[Function]":
-        return WalletWarmFunction
+        return WalletProfilingFunction
 
     def get_storage(self, replace_existing: bool = False) -> PersistentStorage:
         if not hasattr(self, "storage"):
             if not self.config.resources.storage_config:
                 raise RuntimeError(
-                    "The wallet deployment is missing the configuration of pre-allocated storage!"
+                    "The wallet_profiling deployment is missing the configuration of pre-allocated storage!"
                 )
             self.storage = Minio.deserialize(
                 self.config.resources.storage_config,
@@ -72,7 +72,7 @@ class WalletWarm(System):
         is_cached: bool,
     ) -> Tuple[str, int]:
         CONFIG_FILES = {
-            "python": ["handler.py", "server_warm.py", "requirements.txt", ".python_packages"],
+            "python": ["handler.py", "server.py", "requirements.txt", ".python_packages"],
             "nodejs": ["handler.js", "package.json", "node_modules"],
         }
         package_config = CONFIG_FILES[language_name]
@@ -92,7 +92,7 @@ class WalletWarm(System):
 
     def create_function(self, code_package: Benchmark, func_name: str) -> Function:
         function_cfg = FunctionConfig.from_benchmark(code_package)
-        func = WalletWarmFunction(
+        func = WalletProfilingFunction(
             func_name,
             code_package.benchmark,
             code_package.hash,
@@ -133,7 +133,7 @@ class WalletWarm(System):
         changed = super().is_configuration_changed(cached_function, benchmark)
 
         storage = cast(Minio, self.get_storage())
-        function = cast(WalletWarmFunction, cached_function)
+        function = cast(WalletProfilingFunction, cached_function)
         # check if now we're using a new storage
         if function._storage_cfg != storage.config:
             self.logging.info(
@@ -149,7 +149,7 @@ class WalletWarm(System):
 
     def enforce_cold_start(self, functions: List[Function], code_package: Benchmark):
         for function in functions:
-            function = cast(WalletWarmFunction, function)
+            function = cast(WalletProfilingFunction, function)
             function.stop()
 
     def download_metrics(
