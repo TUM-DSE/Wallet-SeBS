@@ -10,7 +10,7 @@ DOCKER_DIR = os.path.join(PROJECT_DIR, "dockerfiles")
 
 parser = argparse.ArgumentParser(description="Run local app experiments.")
 parser.add_argument(
-    "--deployment", default=None, choices=["local", "cvm", "kata_qemu", "kata_fc", "gramine", "gramine_native", "wallet", "wallet_warm", "aws", "azure", "gcp"], action="store"
+    "--deployment", default=None, choices=["local", "cvm", "kata_qemu", "kata_fc", "gramine", "gramine_native", "wallet", "wallet_warm", "wallet_profiling","aws", "azure", "gcp"], action="store"
 )
 parser.add_argument("--type", default=None, choices=["build", "run", "manage"], action="store")
 parser.add_argument("--language", default=None, choices=["python", "nodejs"], action="store")

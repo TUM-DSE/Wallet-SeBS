@@ -37,7 +37,7 @@ class WalletWarm(System):
     def initialize(
         self, config: Dict[str, str] = {}, resource_prefix: Optional[str] = None
     ):
-        self.initialize_resources(select_prefix="wallet_warm")
+        self.initialize_resources(select_prefix="walletwarm")
 
     @property
     def config(self) -> WalletWarmConfig:

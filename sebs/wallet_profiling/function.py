@@ -30,6 +30,9 @@ class HTTPTrigger(Trigger):
 
         begin = datetime.datetime.now()
 
+        with wallet.Wallet() as w:
+            w.stat_reset()
+
         if not self.function._running:
             cold = True
 
@@ -83,6 +86,9 @@ class HTTPTrigger(Trigger):
             raise RuntimeError(f"Couldn't invoke function; output:\n{output.text}")
         output = output.json()
         end = datetime.datetime.now()
+
+        with wallet.Wallet() as w:
+            w.stat_get()
 
         result = ExecutionResult.from_times(begin, end)
         result.request_id = output["request_id"]
