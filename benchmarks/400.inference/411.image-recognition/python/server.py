@@ -62,11 +62,11 @@ def process_request():
         print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data_pickle)} output size.")
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
         output_len = 200 # 123 -> 200 for benchmark 411
-        trustlet.invoke_trustlet("", 0)
+        trustlet.invoke_trustlet_bin("", 0)
         begin = datetime.datetime.now()
-        trustlet.invoke_trustlet(data_pickle, 0)
+        trustlet.invoke_trustlet_bin(data_pickle, 0)
         end = datetime.datetime.now()
-        ret = trustlet.invoke_trustlet("", output_len)
+        ret = trustlet.invoke_trustlet_bin("", output_len)
 
         #ret = trustlet.invoke_trustlet_bin(data_pickle, output_len)
 
