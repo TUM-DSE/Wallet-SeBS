@@ -1,0 +1,137 @@
+import time
+import concurrent.futures
+import datetime
+import requests
+import os
+import subprocess
+
+from sebs.faas.function import ExecutionResult, Function, FunctionConfig, Trigger
+from sebs.storage.config import MinioConfig
+
+
+class HTTPTrigger(Trigger):
+    def __init__(self, function):
+        super().__init__()
+        self.function = function
+
+    @staticmethod
+    def typename() -> str:
+        return "WalletRemote.HTTPTrigger"
+
+    @staticmethod
+    def trigger_type() -> Trigger.TriggerType:
+        return Trigger.TriggerType.HTTP
+
+    def sync_invoke(self, payload: dict) -> ExecutionResult:
+        self.logging.debug(f"Invoke function")
+        cold: bool
+
+        begin = datetime.datetime.now()
+        #begin = time.time_ns()
+
+        if not self.function._running:
+            cold = True
+
+            cl = self.function._code_location
+            cl = cl[cl.find("Benchmark"):]
+            wallet_address = os.environ['WALLET_ADDR']
+            minio_address = ".".join(wallet_address.split(".")[:3]) + ".1:9011"
+            data = {
+                "CODE_LOCATION": cl,
+                "MINIO_ADDRESS": minio_address,
+                "MINIO_ACCESS_KEY": self.function._storage_cfg.access_key,
+                "MINIO_SECRET_KEY": self.function._storage_cfg.secret_key,
+            }
+            req = requests.post(f"http://{os.environ['WALLET_ADDR']}:9002/cold",json=data)
+
+            self.function._running = True
+
+            if req.status_code != 200:
+                self.logging.info(f"http://{os.environ['WALLET_ADDR']}:9002/cold")
+                raise RuntimeError(req.text)
+
+            self.logging.info(f"Function Started")
+        else:
+            cold = False
+
+        output = requests.post(f"http://{os.environ['WALLET_ADDR']}:9002", json=payload)
+        if output.status_code != 200:
+            self.function.stop()
+            raise RuntimeError(f"Couldn't invoke function; output:\n{output.text}")
+        output = output.json()
+        end = datetime.datetime.now()
+        #begin = datetime.date.fromtimestamp(begin/1e9)
+
+        result = ExecutionResult.from_times(begin, end)
+        result.request_id = output["request_id"]
+        result.parse_benchmark_output(output)
+        result.times.http_startup = 0
+        result.stats.cold_start = cold
+        return result
+
+    def async_invoke(self, payload: dict) -> concurrent.futures.Future:
+        pool = concurrent.futures.ThreadPoolExecutor()
+        fut = pool.submit(self.sync_invoke, payload)
+        return fut
+
+    def serialize(self) -> dict:
+        return {}
+
+    @staticmethod
+    def deserialize(obj: dict) -> Trigger:
+        raise NotImplementedError()
+
+
+class WalletRemoteFunction(Function):
+    def __init__(
+        self,
+        name: str,
+        benchmark: str,
+        code_package_hash: str,
+        code_location: str,
+        config: FunctionConfig,
+        storage_cfg: MinioConfig,
+    ):
+        super().__init__(benchmark, name, code_package_hash, config)
+        self._code_location = code_location
+        self._storage_cfg = storage_cfg
+
+        self._running = False
+
+        trigger = HTTPTrigger(self)
+        super().add_trigger(trigger)
+
+    @staticmethod
+    def typename() -> str:
+        return "WalletRemote.WalletRemoteFunction"
+
+    def serialize(self) -> dict:
+        return {
+            **super().serialize(),
+            "storage_cfg": self._storage_cfg.serialize(),
+            "code_location": self._code_location,
+        }
+
+    @staticmethod
+    def deserialize(cached_config: dict) -> "WalletRemoteFunction":
+        function = WalletRemoteFunction(
+            cached_config["name"],
+            cached_config["benchmark"],
+            cached_config["hash"],
+            cached_config["code_location"],
+            FunctionConfig.deserialize(cached_config["config"]),
+            MinioConfig.deserialize(cached_config["storage_cfg"]),
+        )
+        return function
+
+    def add_trigger(self, trigger: Trigger):
+        raise NotImplementedError()
+
+    def stop(self):
+        if self._running:
+            self.logging.info(f"Stopping function")
+            requests.post(f"http://{os.environ['WALLET_ADDR']}:9002/stop")
+            self._running = False
+            self.logging.info(f"Function stopped succesfully")
+        else:
+            self.logging.info("Not stopping function as it was not running")
