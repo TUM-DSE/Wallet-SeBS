@@ -41,12 +41,12 @@ class HTTPTrigger(Trigger):
                 "MINIO_ACCESS_KEY": self.function._storage_cfg.access_key,
                 "MINIO_SECRET_KEY": self.function._storage_cfg.secret_key,
             }
-            req = requests.post(f"http://{os.environ['WALLET_ADDR']}:9002/warm",json=data)
+            req = requests.post(f"http://{os.environ['WALLET_ADDR']}:9002/cold",json=data)
 
             self.function._running = True
 
             if req.status_code != 200:
-                self.logging.info(f"http://{os.environ['WALLET_ADDR']}:9002/warm")
+                self.logging.info(f"http://{os.environ['WALLET_ADDR']}:9002/cold")
                 raise RuntimeError(req.text)
 
             self.logging.info(f"Function Started")

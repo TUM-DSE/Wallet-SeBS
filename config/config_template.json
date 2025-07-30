@@ -8,9 +8,10 @@
       "version": "3.11"
     },
     "perf-cost": {
-      "benchmark": "110.dynamic-html",
+      "benchmark": "210.thumbnailer",
       "experiments": [
-	"cold"
+        "cold",
+        "sequential"
       ],
       "input-size": "small",
       "repetitions": 5,
@@ -42,6 +43,9 @@
       "storage": {}
     },
     "wallet_profiling": {
+      "storage": {}
+    },
+    "wallet_remote": {
       "storage": {}
     },
     "local": {

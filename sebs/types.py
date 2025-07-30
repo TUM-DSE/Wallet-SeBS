@@ -11,6 +11,7 @@ class Platforms(str, Enum):
     GRAMINE_NATIVE = "gramine_native"
     WALLET = "wallet"
     WALLET_WARM = "wallet_warm"
+    WALLET_REMOTE = "wallet_remote"
     GCP = "gcp"
     LOCAL = "local"
     OPENWHISK = "openwhisk"

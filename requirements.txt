@@ -19,3 +19,8 @@ scipy
 pycurl>=7.43
 click>=7.1.2
 
+jinja2
+markupsafe
+tomli
+tomli_w
+python-dateutil

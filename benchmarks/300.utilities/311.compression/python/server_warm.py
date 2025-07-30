@@ -60,6 +60,7 @@ def process_request():
         trustlet = zygote.create_trustlet(FUNCTION_CODE)
         output_len = 9328000 # 9327022 -> 9328000 for benchmark 311
         trustlet.invoke_trustlet_bin("", 0)
+        outb_lib.outb()
         begin = datetime.datetime.now()
         trustlet.invoke_trustlet_bin(data, 0)
         end = datetime.datetime.now()
@@ -84,7 +85,8 @@ def process_request():
         "result": {"output": ret},
     }
 
-ZYGOTE_ID = int(sys.argv[2])
-FUNCTION_CODE = sys.argv[3]
+if __name__ == "__main__":
+    ZYGOTE_ID = int(sys.argv[2])
+    FUNCTION_CODE = sys.argv[3]
 
-run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)
+    run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)

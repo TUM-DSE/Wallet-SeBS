@@ -48,6 +48,7 @@ def process_request():
                                # 176404566 nur pickle
                                # 115342263 json dann pickle
         trustlet.invoke_trustlet_bin("", 0)
+        outb_lib.outb()
         begin = datetime.datetime.now()
         trustlet.invoke_trustlet_bin(data, 0)
         end = datetime.datetime.now()
@@ -71,7 +72,8 @@ def process_request():
         "result": {"output": ret},
     }
 
-ZYGOTE_ID = int(sys.argv[2])
-FUNCTION_CODE = sys.argv[3]
+if __name__ == "__main__":
+    ZYGOTE_ID = int(sys.argv[2])
+    FUNCTION_CODE = sys.argv[3]
 
-run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)
+    run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)

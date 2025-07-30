@@ -8,7 +8,10 @@ import subprocess
 from sebs.faas.function import ExecutionResult, Function, FunctionConfig, Trigger
 from sebs.storage.config import MinioConfig
 
-import wallet
+try:
+    import wallet
+except:
+    pass
 
 
 class HTTPTrigger(Trigger):

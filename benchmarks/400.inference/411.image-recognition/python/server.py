@@ -1,9 +1,10 @@
 import datetime
+import time
 import os
 import sys
 import uuid
 import pickle
-
+import ctypes
 from function import storage
 client = storage.storage.get_instance()
 
@@ -63,7 +64,8 @@ def process_request():
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
         output_len = 200 # 123 -> 200 for benchmark 411
         trustlet.invoke_trustlet_bin("", 0)
-        begin = datetime.datetime.now()
+        outb_lib.outb()
+        begin = time.time_ns() / 1e9#datetime.datetime.now()
         trustlet.invoke_trustlet_bin(data_pickle, 0)
         end = datetime.datetime.now()
         ret = trustlet.invoke_trustlet_bin("", output_len)
@@ -73,12 +75,12 @@ def process_request():
         ret = pickle.loads(ret)
 
     return {
-        "begin": begin.strftime("%s.%f"),
+        "begin": begin,
         "end": (end + (image_download_end - image_download_begin) + (model_download_end - model_download_begin)).strftime("%s.%f"),
         "request_id": str(uuid.uuid4()),
         "is_cold": False,
         "result": {"output": ret},
     }
 
-
-run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)
+if __name__ == "__main__":
+    run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)

@@ -8,8 +8,10 @@ import subprocess
 from sebs.faas.function import ExecutionResult, Function, FunctionConfig, Trigger
 from sebs.storage.config import MinioConfig
 
-import wallet
-
+try:
+    import wallet
+except:
+    pass
 
 class HTTPTrigger(Trigger):
     def __init__(self, function):
@@ -44,7 +46,6 @@ class HTTPTrigger(Trigger):
                 "MINIO_ACCESS_KEY": self.function._storage_cfg.access_key,
                 "MINIO_SECRET_KEY": self.function._storage_cfg.secret_key,
             }
-
             self.function._context = subprocess.Popen([
                 'python-venv/bin/python',
                 f'{self.function._code_location}/server_warm.py',

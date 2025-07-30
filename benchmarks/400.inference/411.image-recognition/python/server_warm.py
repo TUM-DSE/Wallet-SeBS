@@ -18,10 +18,11 @@ model = None
 def alive():
     return {"result:" "ok"}
 
+model_b = None
 
 @route("/", method="POST")
 def process_request():
-
+    global model_b
     data = request.json
 
     bucket = data.get('bucket').get('bucket')
@@ -35,7 +36,6 @@ def process_request():
     image_download_end = datetime.datetime.now()
 
     data['image'] = image
-    del image
 
     global model
     print(f"not model: {not model}", flush=True)
@@ -47,13 +47,12 @@ def process_request():
         model_download_end = datetime.datetime.now()
 
         data['model'] = model_b
-        del model_b
     else:
         model_download_begin = datetime.datetime.now()
+        data['model'] = model_b
         model_download_end = model_download_begin
 
     data_pickle = pickle.dumps(data)
-    del data
 
     begin = None
     end = None
@@ -64,11 +63,12 @@ def process_request():
         zygote = wallet.Zygote(ZYGOTE_ID)
         trustlet = zygote.create_trustlet(FUNCTION_CODE)
         output_len = 200 # 123 -> 200 for benchmark 411
-        trustlet.invoke_trustlet("", 0)
+        trustlet.invoke_trustlet_bin("", 0)
+        outb_lib.outb()
         begin = datetime.datetime.now()
-        trustlet.invoke_trustlet(data_pickle, 0)
+        trustlet.invoke_trustlet_bin(data_pickle, 0)
         end = datetime.datetime.now()
-        ret = trustlet.invoke_trustlet("", output_len)
+        ret = trustlet.invoke_trustlet_bin("", output_len)
 
         #ret = trustlet.invoke_trustlet_bin(data_pickle, output_len)
 
@@ -82,7 +82,8 @@ def process_request():
         "result": {"output": ret},
     }
 
-ZYGOTE_ID = int(sys.argv[2])
-FUNCTION_CODE = sys.argv[3]
+if __name__ == "__main__":
+    ZYGOTE_ID = int(sys.argv[2])
+    FUNCTION_CODE = sys.argv[3]
 
-run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)
+    run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)
